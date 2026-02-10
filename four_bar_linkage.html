@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>铰链四杆机构运动分析与演示</title>
+<style>
+:root {
+    --bg: #ffffff;
+    --text: #1a1a1a;
+    --text2: #666;
+    --border: #e0e0e0;
+    --accent: #E53935;
+    --blue: #1565C0;
+    --green: #2E7D32;
+    --orange: #EF6C00;
+    --card-bg: #f7f7f8;
+    --shadow: 0 2px 12px rgba(0,0,0,0.08);
+    --radius: 12px;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { width:100%; overflow-x:hidden; background:var(--bg); color:var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Helvetica Neue", sans-serif; }
+.app { max-width:480px; margin:0 auto; padding:0 0 32px; }
+
+/* Header */
+.header { padding:20px 16px 12px; text-align:center; }
+.header h1 { font-size:18px; font-weight:700; letter-spacing:0.5px; }
+.header p { font-size:12px; color:var(--text2); margin-top:4px; }
+
+/* Canvas */
+.canvas-wrap { position:relative; width:100%; padding:0 8px; }
+canvas { display:block; width:100%; height:380px; border-radius:var(--radius);
+    background:#fff; border:1px solid var(--border); }
+
+/* Parameters */
+.params { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding:12px 16px 0; }
+.param-card { background:var(--card-bg); border-radius:10px; padding:10px 8px; text-align:center; }
+.param-label { font-size:11px; color:var(--text2); margin-bottom:4px; display:flex; align-items:center; justify-content:center; gap:4px; }
+.param-dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+.param-value { font-size:18px; font-weight:700; font-variant-numeric:tabular-nums; }
+
+/* Angle Slider */
+.angle-slider-wrap { padding:12px 16px 0; }
+.angle-slider-wrap label { font-size:11px; color:var(--text2); display:block; margin-bottom:4px; }
+.angle-slider-wrap input[type=range] { width:100%; accent-color:var(--accent); height:6px; }
+
+/* Controls */
+.controls { display:flex; align-items:center; justify-content:center; gap:10px; padding:14px 16px 0; }
+.btn { border:none; background:var(--card-bg); border-radius:10px; cursor:pointer;
+    font-size:14px; display:flex; align-items:center; justify-content:center;
+    color:var(--text); transition:all .15s; }
+.btn:active { transform:scale(0.93); background:#e8e8e8; }
+.btn-sm { width:44px; height:44px; }
+.btn-play { width:56px; height:56px; font-size:20px; background:var(--text); color:#fff; border-radius:50%; }
+.btn-play:active { background:#333; }
+
+/* Speed */
+.speed-wrap { display:flex; align-items:center; gap:8px; padding:10px 16px 0; }
+.speed-wrap span { font-size:11px; color:var(--text2); white-space:nowrap; }
+.speed-wrap input[type=range] { flex:1; accent-color:var(--text); height:4px; }
+
+/* Toggles */
+.toggles { display:flex; gap:8px; padding:12px 16px 0; flex-wrap:wrap; }
+.toggle-chip { display:flex; align-items:center; gap:6px; padding:8px 14px;
+    border-radius:20px; border:1px solid var(--border); font-size:12px;
+    cursor:pointer; user-select:none; transition:all .15s; background:#fff; }
+.toggle-chip.active { background:var(--text); color:#fff; border-color:var(--text); }
+
+/* Knowledge Cards */
+.knowledge { padding:20px 16px 0; }
+.knowledge h2 { font-size:15px; font-weight:700; margin-bottom:12px; }
+.card-viewport { overflow:hidden; border-radius:var(--radius); }
+.card-track { display:flex; transition:transform .35s cubic-bezier(.4,0,.2,1); }
+.card { min-width:100%; padding:24px 20px; background:var(--card-bg); border-radius:var(--radius); }
+.card-title { font-size:16px; font-weight:700; margin-bottom:12px; color:var(--accent);
+    display:flex; align-items:center; gap:8px; }
+.card-num { width:24px; height:24px; border-radius:50%; background:var(--accent); color:#fff;
+    font-size:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.card p { font-size:13px; line-height:1.7; color:var(--text); margin-bottom:8px; }
+.card .formula { background:#fff; border-radius:8px; padding:10px 14px; margin:10px 0;
+    font-family:"Times New Roman",serif; font-size:15px; text-align:center;
+    border:1px solid var(--border); }
+.card .note { font-size:12px; color:var(--text2); padding:8px 12px;
+    background:#fff; border-radius:8px; border-left:3px solid var(--accent); }
+
+.card-nav { display:flex; align-items:center; justify-content:space-between; padding:12px 0 0; }
+.card-nav button { border:none; background:var(--card-bg); padding:10px 24px;
+    border-radius:10px; font-size:13px; cursor:pointer; color:var(--text); font-weight:600; }
+.card-nav button:disabled { opacity:0.3; cursor:default; }
+.card-nav button:active:not(:disabled) { background:#e0e0e0; }
+.card-nav span { font-size:12px; color:var(--text2); }
+</style>
+</head>
+<body>
+<div class="app">
+    <div class="header">
+        <h1>铰链四杆机构运动分析</h1>
+        <p>Planar Four-Bar Linkage Mechanism</p>
+    </div>
+
+    <div class="canvas-wrap">
+        <canvas id="cv"></canvas>
+    </div>
+
+    <div class="params">
+        <div class="param-card">
+            <div class="param-label"><span class="param-dot" style="background:var(--blue)"></span>曲柄转角 θ₂</div>
+            <div class="param-value" id="valTheta2">0°</div>
+        </div>
+        <div class="param-card">
+            <div class="param-label"><span class="param-dot" style="background:var(--orange)"></span>摇杆转角 θ₄</div>
+            <div class="param-value" id="valTheta4">0°</div>
+        </div>
+        <div class="param-card">
+            <div class="param-label"><span class="param-dot" style="background:var(--green)"></span>传动角 γ</div>
+            <div class="param-value" id="valGamma">0°</div>
+        </div>
+        <div class="param-card">
+            <div class="param-label"><span class="param-dot" style="background:var(--accent)"></span>角速比 ω₄/ω₂</div>
+            <div class="param-value" id="valRatio">0</div>
+        </div>
+    </div>
+
+    <div class="angle-slider-wrap">
+        <label>曲柄角度（拖动可逐帧分析）</label>
+        <input type="range" id="angleSlider" min="0" max="360" value="0" step="0.5">
+    </div>
+
+    <div class="controls">
+        <button class="btn btn-sm" id="btnStepBack" title="后退1°">⏪</button>
+        <button class="btn btn-sm" id="btnBack" title="后退">◀◀</button>
+        <button class="btn btn-play" id="btnPlay" title="播放/暂停">▶</button>
+        <button class="btn btn-sm" id="btnFwd" title="快进">▶▶</button>
+        <button class="btn btn-sm" id="btnStepFwd" title="前进1°">⏩</button>
+    </div>
+
+    <div class="speed-wrap">
+        <span>慢</span>
+        <input type="range" id="speedSlider" min="0.2" max="4" value="1" step="0.1">
+        <span>快</span>
+    </div>
+
+    <div class="toggles">
+        <div class="toggle-chip active" data-key="trace">轨迹</div>
+        <div class="toggle-chip active" data-key="angles">角度标注</div>
+        <div class="toggle-chip" data-key="vectors">力与速度</div>
+    </div>
+
+    <div class="knowledge">
+        <h2>知识要点</h2>
+        <div class="card-viewport">
+            <div class="card-track" id="cardTrack">
+                <div class="card">
+                    <div class="card-title"><span class="card-num">1</span>机构组成</div>
+                    <p>铰链四杆机构由<b>四个构件</b>通过<b>四个转动副</b>（铰链）依次连接而成的平面连杆机构。</p>
+                    <p><b>曲柄 AB</b> — 能做整周回转的连架杆（原动件）<br>
+                    <b>连杆 BC</b> — 连接两个活动铰链的中间构件<br>
+                    <b>摇杆 CD</b> — 只能做摆动的连架杆（从动件）<br>
+                    <b>机架 AD</b> — 固定不动的构件</p>
+                    <div class="note">A、D 为固定铰链（与机架相连），B、C 为活动铰链。</div>
+                </div>
+                <div class="card">
+                    <div class="card-title"><span class="card-num">2</span>曲柄存在条件</div>
+                    <p>判断四杆机构中是否存在曲柄，需满足<b>格拉肖夫（Grashof）条件</b>：</p>
+                    <div class="formula">s + l ≤ p + q</div>
+                    <p>其中 s 为最短杆，l 为最长杆，p、q 为其余两杆。</p>
+                    <p>满足条件时：<br>
+                    · 最短杆为连架杆 → <b>曲柄摇杆机构</b><br>
+                    · 最短杆为机架 → <b>双曲柄机构</b><br>
+                    · 最短杆为连杆 → <b>双摇杆机构</b></p>
+                </div>
+                <div class="card">
+                    <div class="card-title"><span class="card-num">3</span>传动角分析</div>
+                    <p><b>传动角 γ</b> 是连杆 BC 与从动件 CD 之间所夹的锐角。它反映了机构的力传递效率。</p>
+                    <div class="formula">cos γ = (b² + c² − BD²) / (2bc)</div>
+                    <p>· γ = 90° 时传力效率最高<br>
+                    · γ → 0° 或 180° 时趋向死点，无法传力<br>
+                    · <b>设计标准：γ<sub>min</sub> ≥ 40°</b></p>
+                    <div class="note">传动角越大，机构传力性能越好。压力角 α = 90° − γ。</div>
+                </div>
+                <div class="card">
+                    <div class="card-title"><span class="card-num">4</span>急回特性</div>
+                    <p>从动件（摇杆）正行程和反行程的<b>平均速度不等</b>的性质称为急回特性。</p>
+                    <div class="formula">K = (180° + θ) / (180° − θ)</div>
+                    <p>其中 K 为<b>行程速比系数</b>，θ 为极位夹角。</p>
+                    <p>· K = 1：无急回特性<br>
+                    · K > 1：反行程速度 > 正行程速度<br>
+                    · θ 越大，急回特性越显著</p>
+                </div>
+                <div class="card">
+                    <div class="card-title"><span class="card-num">5</span>死点位置</div>
+                    <p>当<b>传动角 γ = 0°</b>（即连杆与从动件共线）时，机构处于<b>死点位置</b>。</p>
+                    <p>此时驱动力通过铰链 C 的分力全部指向铰链 D，无法产生转矩，机构卡死。</p>
+                    <div class="note">解决死点的方法：利用飞轮的惯性、采用双缸机构等。在曲柄为原动件的情况下，摇杆不会出现死点。</div>
+                </div>
+            </div>
+        </div>
+        <div class="card-nav">
+            <button id="cardPrev" disabled>上一张</button>
+            <span id="cardIdx">1 / 5</span>
+            <button id="cardNext">下一张</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ========== CONFIGURATION ==========
+const L = { a:100, b:260, c:200, d:300 }; // crank, coupler, rocker, ground
+
+// ========== STATE ==========
+let theta = 0;           // crank angle (math coords, radians, CCW)
+let playing = false;
+let speed = 1;           // deg per frame
+let showTrace = true;
+let showAngles = true;
+let showVectors = false;
+let cTraceHistory = []; // accumulated C positions for coupler curve
+
+// ========== CANVAS SETUP ==========
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+let W, H, scale, ox, oy; // canvas logical size, scale, offsets
+
+function resize() {
+    const dpr = window.devicePixelRatio || 1;
+    const rect = cv.getBoundingClientRect();
+    W = rect.width; H = rect.height;
+    cv.width = W * dpr; cv.height = H * dpr;
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // Scale mechanism to fit
+    const mechW = L.d + L.a + L.c + 40;
+    const mechH = (Math.max(L.a, L.c)) * 2 + 80;
+    scale = Math.min((W - 40) / mechW, (H - 60) / mechH, 1.0);
+    ox = W / 2 - (L.d / 2) * scale;
+    oy = H * 0.58;
+}
+window.addEventListener('resize', resize);
+resize();
+
+// ========== MATH ==========
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+function solve(th) {
+    const Bx = L.a * Math.cos(th);
+    const By = L.a * Math.sin(th);
+    const dx = L.d - Bx, dy = -By;
+    const BD = Math.sqrt(dx*dx + dy*dy);
+    if (BD > L.b + L.c || BD < Math.abs(L.b - L.c)) return null;
+    const cosAB = clamp((BD*BD + L.b*L.b - L.c*L.c) / (2*BD*L.b), -1, 1);
+    const angB = Math.acos(cosAB);
+    const phi = Math.atan2(dy, dx);
+    const Cx = Bx + L.b * Math.cos(phi + angB);
+    const Cy = By + L.b * Math.sin(phi + angB);
+    const cosG = clamp((L.b*L.b + L.c*L.c - BD*BD) / (2*L.b*L.c), -1, 1);
+    const gamma = Math.acos(cosG);
+    const theta4 = Math.atan2(Cy, Cx - L.d);
+    return { Bx, By, Cx, Cy, BD, gamma, theta4 };
+}
+
+// Precompute rocker arc range
+let rockerMin = Infinity, rockerMax = -Infinity;
+(function() {
+    for (let t = 0; t < Math.PI*2; t += 0.005) {
+        const p = solve(t);
+        if (!p) continue;
+        if (p.theta4 < rockerMin) rockerMin = p.theta4;
+        if (p.theta4 > rockerMax) rockerMax = p.theta4;
+    }
+})();
+
+// ========== COORDINATE TRANSFORM ==========
+function tc(mx, my) { // math to canvas
+    return [ox + mx * scale, oy - my * scale];
+}
+
+// ========== DRAWING HELPERS ==========
+function drawLine(x1,y1,x2,y2,color,width) {
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+    ctx.strokeStyle=color; ctx.lineWidth=width; ctx.stroke();
+}
+
+function drawCircle(x,y,r,fill,stroke,lw) {
+    ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2);
+    if(fill){ctx.fillStyle=fill;ctx.fill();}
+    if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=lw||1.5;ctx.stroke();}
+}
+
+function drawArrow(x1,y1,x2,y2,color,lw) {
+    const dx=x2-x1, dy=y2-y1, len=Math.sqrt(dx*dx+dy*dy);
+    if(len<1)return;
+    const ux=dx/len, uy=dy/len;
+    const hl=10, hw=5;
+    ctx.beginPath(); ctx.moveTo(x1,y1); ctx.lineTo(x2,y2);
+    ctx.strokeStyle=color; ctx.lineWidth=lw||2.5; ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(x2,y2);
+    ctx.lineTo(x2-ux*hl+uy*hw, y2-uy*hl-ux*hw);
+    ctx.lineTo(x2-ux*hl-uy*hw, y2-uy*hl+ux*hw);
+    ctx.closePath(); ctx.fillStyle=color; ctx.fill();
+}
+
+function drawGround(cx, cy) {
+    const s = 12 * scale;
+    // Triangle
+    ctx.beginPath();
+    ctx.moveTo(cx - s, cy + s*0.8);
+    ctx.lineTo(cx + s, cy + s*0.8);
+    ctx.lineTo(cx, cy + 2);
+    ctx.closePath();
+    ctx.strokeStyle='#000'; ctx.lineWidth=1.5; ctx.stroke();
+    // Hatching
+    const n=5, w=s*2.2, top=cy+s*0.8, bot=top+s*0.5;
+    ctx.beginPath();
+    ctx.moveTo(cx-s*1.1, top); ctx.lineTo(cx+s*1.1, top);
+    ctx.strokeStyle='#000'; ctx.lineWidth=1.5; ctx.stroke();
+    for(let i=0;i<n;i++){
+        const x0 = cx - s*1.1 + (w/n)*i;
+        ctx.beginPath(); ctx.moveTo(x0+w/n, top); ctx.lineTo(x0, bot);
+        ctx.strokeStyle='#000'; ctx.lineWidth=1; ctx.stroke();
+    }
+}
+
+function drawAngleArc(cx, cy, startAng, endAng, radius, color, label, labelOffset) {
+    // startAng and endAng are math angles; draw CCW arc on screen
+    const r = radius * scale;
+    const cStart = -startAng; // canvas angle
+    const cEnd = -endAng;
+    ctx.beginPath();
+    ctx.arc(cx, cy, r, cStart, cEnd, true); // counterclockwise=true → CCW on screen
+    ctx.strokeStyle = color; ctx.lineWidth = 2; ctx.stroke();
+    // Label
+    const mid = (startAng + endAng) / 2;
+    const lr = r + (labelOffset || 14);
+    const lx = cx + lr * Math.cos(mid);  // canvas x offset
+    const ly = cy - lr * Math.sin(mid);  // canvas y offset (flip y)
+    ctx.fillStyle = color; ctx.font = 'bold 13px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
+    ctx.fillText(label, lx, ly);
+}
+
+// ========== MAIN DRAW ==========
+function draw() {
+    const pos = solve(theta);
+    if (!pos) return;
+
+    ctx.clearRect(0, 0, W, H);
+
+    const [Ax, Ay] = tc(0, 0);
+    const [Bx, By] = tc(pos.Bx, pos.By);
+    const [Cx, Cy] = tc(pos.Cx, pos.Cy);
+    const [Dx, Dy] = tc(L.d, 0);
+
+    // ---- Traces ----
+    if (showTrace) {
+        ctx.setLineDash([6, 4]);
+        ctx.strokeStyle = '#bbb'; ctx.lineWidth = 1.2;
+        // B trace: full circle around A
+        ctx.beginPath(); ctx.arc(Ax, Ay, L.a * scale, 0, Math.PI*2); ctx.stroke();
+        // C trace: arc around D
+        const cArcStart = -rockerMax; // canvas angle (negate math angle)
+        const cArcEnd = -rockerMin;
+        ctx.beginPath();
+        ctx.arc(Dx, Dy, L.c * scale, cArcStart, cArcEnd, false);
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+
+    // ---- Ground line (thin dashed) ----
+    ctx.setLineDash([8, 6]);
+    ctx.strokeStyle = '#ccc'; ctx.lineWidth = 0.8;
+    ctx.beginPath(); ctx.moveTo(Ax - 30, Ay); ctx.lineTo(Dx + 30, Ay); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // ---- Links ----
+    // AD (ground) - don't draw as a visible link, shown as ground
+    // AB (crank)
+    drawLine(Ax, Ay, Bx, By, '#000', 4 * scale);
+    // BC (coupler) - thicker
+    drawLine(Bx, By, Cx, Cy, '#000', 5 * scale);
+    // CD (rocker)
+    drawLine(Cx, Cy, Dx, Dy, '#000', 4 * scale);
+
+    // Coupler decoration (ticks on BC)
+    {
+        const n = 3;
+        const ux = (Cx-Bx), uy = (Cy-By);
+        const len = Math.sqrt(ux*ux+uy*uy);
+        const nx = -uy/len, ny = ux/len;
+        for(let i=1;i<=n;i++){
+            const t = i/(n+1);
+            const px = Bx + ux*t, py = By + uy*t;
+            const ts = 5*scale;
+            ctx.beginPath(); ctx.moveTo(px+nx*ts, py+ny*ts); ctx.lineTo(px-nx*ts, py-ny*ts);
+            ctx.strokeStyle='#000'; ctx.lineWidth=1.5*scale; ctx.stroke();
+        }
+    }
+
+    // ---- Ground supports ----
+    drawGround(Ax, Ay);
+    drawGround(Dx, Dy);
+
+    // ---- Joints ----
+    const jr = 5 * scale;
+    drawCircle(Ax, Ay, jr, '#fff', '#000', 2.5);
+    drawCircle(Bx, By, jr, '#fff', '#000', 2.5);
+    drawCircle(Cx, Cy, jr, '#fff', '#000', 2.5);
+    drawCircle(Dx, Dy, jr, '#fff', '#000', 2.5);
+
+    // ---- Angle arcs ----
+    if (showAngles) {
+        // Crank angle θ₂ at A (from +x axis, CCW)
+        const th2 = ((theta % (Math.PI*2)) + Math.PI*2) % (Math.PI*2);
+        if (th2 > 0.05) {
+            drawAngleArc(Ax, Ay, 0, th2, 30, '#1565C0', 'θ₂', 16);
+        }
+        // Rocker angle θ₄ at D (from +x axis, CCW)
+        drawAngleArc(Dx, Dy, 0, pos.theta4, 30, '#EF6C00', 'θ₄', 16);
+        // Transmission angle γ at C (between CB and CD directions)
+        // Use canvas angles directly for accuracy
+        const angCB_c = Math.atan2(By - Cy, Bx - Cx); // canvas angle from C to B
+        const angCD_c = Math.atan2(Dy - Cy, Dx - Cx); // canvas angle from C to D
+        let gDiff = angCB_c - angCD_c;
+        while (gDiff > Math.PI) gDiff -= 2*Math.PI;
+        while (gDiff < -Math.PI) gDiff += 2*Math.PI;
+        const gR = 25 * scale;
+        ctx.beginPath();
+        if (gDiff > 0) ctx.arc(Cx, Cy, gR, angCD_c, angCB_c, false);
+        else ctx.arc(Cx, Cy, gR, angCB_c, angCD_c, false);
+        ctx.strokeStyle = '#2E7D32'; ctx.lineWidth = 2; ctx.stroke();
+        // γ label
+        const gMid = angCD_c + gDiff / 2;
+        const gLR = gR + 16;
+        ctx.fillStyle = '#2E7D32'; ctx.font = 'bold 13px sans-serif';
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText('γ', Cx + Math.cos(gMid)*gLR, Cy + Math.sin(gMid)*gLR);
+    }
+
+    // ---- Force & Velocity vectors ----
+    if (showVectors) {
+        const arrLen = 55 * scale;
+        // Force F along BC direction (from B toward C, applied at C) in math coords
+        const fMx = pos.Cx - pos.Bx, fMy = pos.Cy - pos.By;
+        const fMLen = Math.sqrt(fMx*fMx + fMy*fMy);
+        const fUxM = fMx/fMLen, fUyM = fMy/fMLen; // unit vector in math
+        // Convert to canvas direction: x same, y flipped
+        const fEndX = Cx + fUxM * arrLen;
+        const fEndY = Cy - fUyM * arrLen;
+        drawArrow(Cx, Cy, fEndX, fEndY, '#E53935', 2.5);
+        ctx.fillStyle='#E53935'; ctx.font='bold 14px sans-serif';
+        ctx.textAlign='left'; ctx.textBaseline='middle';
+        ctx.fillText('F', fEndX+8, fEndY-4);
+
+        // Velocity V perpendicular to DC at C
+        const dt = 0.001;
+        const pn = solve(theta + dt), pp = solve(theta - dt);
+        if (pn && pp) {
+            const t4n = Math.atan2(pn.Cy, pn.Cx - L.d);
+            const t4p = Math.atan2(pp.Cy, pp.Cx - L.d);
+            let omega4 = (t4n - t4p) / (2*dt);
+            // DC direction in math coords
+            const dcMx = pos.Cx - L.d, dcMy = pos.Cy;
+            const dcLen = Math.sqrt(dcMx*dcMx + dcMy*dcMy);
+            // Perpendicular to DC: rotate 90° in direction of omega4
+            const sign = omega4 >= 0 ? 1 : -1;
+            const vUxM = -sign * dcMy / dcLen;  // perpendicular unit vector in math
+            const vUyM =  sign * dcMx / dcLen;
+            // Convert to canvas
+            const vEndX = Cx + vUxM * arrLen;
+            const vEndY = Cy - vUyM * arrLen;
+            drawArrow(Cx, Cy, vEndX, vEndY, '#1565C0', 2.5);
+            ctx.fillStyle='#1565C0'; ctx.font='bold 14px sans-serif';
+            ctx.textAlign='left'; ctx.textBaseline='middle';
+            ctx.fillText('V', vEndX+8, vEndY-4);
+
+            // α label between F and V
+            const fCanvasAng = Math.atan2(fEndY - Cy, fEndX - Cx);
+            const vCanvasAng = Math.atan2(vEndY - Cy, vEndX - Cx);
+            let diff = vCanvasAng - fCanvasAng;
+            while (diff > Math.PI) diff -= 2*Math.PI;
+            while (diff < -Math.PI) diff += 2*Math.PI;
+            const aR = 22 * scale;
+            ctx.beginPath();
+            if (diff > 0) ctx.arc(Cx, Cy, aR, fCanvasAng, vCanvasAng, false);
+            else ctx.arc(Cx, Cy, aR, vCanvasAng, fCanvasAng, false);
+            ctx.strokeStyle='#E53935'; ctx.lineWidth=1.5; ctx.stroke();
+            const aMid = fCanvasAng + diff/2;
+            ctx.fillStyle='#E53935'; ctx.font='bold 12px sans-serif';
+            ctx.textAlign='center'; ctx.textBaseline='middle';
+            ctx.fillText('α', Cx+Math.cos(aMid)*(aR+14), Cy+Math.sin(aMid)*(aR+14));
+        }
+    }
+
+    // ---- C-point accumulated trace ----
+    if (showTrace && cTraceHistory.length > 1) {
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(46,125,50,0.3)'; ctx.lineWidth = 1.5;
+        const [tx0, ty0] = tc(cTraceHistory[0][0], cTraceHistory[0][1]);
+        ctx.moveTo(tx0, ty0);
+        for (let i = 1; i < cTraceHistory.length; i++) {
+            const [tx, ty] = tc(cTraceHistory[i][0], cTraceHistory[i][1]);
+            ctx.lineTo(tx, ty);
+        }
+        ctx.stroke();
+    }
+
+    // ---- Labels ----
+    ctx.font = 'bold 16px sans-serif'; ctx.fillStyle = '#E53935'; ctx.textBaseline='middle';
+    const lo = 18 * scale; // label offset
+    ctx.textAlign='right'; ctx.fillText('A', Ax - lo, Ay - 2);
+    ctx.textAlign='center'; ctx.fillText('B', Bx - lo*0.5, By - lo);
+    ctx.textAlign='center'; ctx.fillText('C', Cx + lo*0.3, Cy - lo);
+    ctx.textAlign='left';  ctx.fillText('D', Dx + lo*0.5, Dy - 2);
+
+    // ---- Link labels ----
+    ctx.font = '11px sans-serif'; ctx.fillStyle = '#999';
+    const midAB_x = (Ax+Bx)/2, midAB_y = (Ay+By)/2;
+    ctx.textAlign='right'; ctx.fillText('a', midAB_x-8, midAB_y);
+    const midBC_x = (Bx+Cx)/2, midBC_y = (By+Cy)/2;
+    ctx.textAlign='center'; ctx.fillText('b', midBC_x, midBC_y-10);
+    const midCD_x = (Cx+Dx)/2, midCD_y = (Cy+Dy)/2;
+    ctx.textAlign='left'; ctx.fillText('c', midCD_x+8, midCD_y);
+    ctx.textAlign='center'; ctx.fillText('d', (Ax+Dx)/2, Ay+22);
+
+    // ---- Update parameter display ----
+    const deg = (r) => (r * 180 / Math.PI).toFixed(1);
+    const th2Deg = ((theta % (Math.PI*2) + Math.PI*2) % (Math.PI*2)) * 180 / Math.PI;
+    document.getElementById('valTheta2').textContent = th2Deg.toFixed(1) + '°';
+    document.getElementById('valTheta4').textContent = deg(pos.theta4) + '°';
+    // Display acute transmission angle
+    let gDeg = pos.gamma * 180 / Math.PI;
+    if (gDeg > 90) gDeg = 180 - gDeg;
+    document.getElementById('valGamma').textContent = gDeg.toFixed(1) + '°';
+
+    // Color the gamma value based on quality
+    const gammaEl = document.getElementById('valGamma');
+    if (gDeg < 40) gammaEl.style.color = '#E53935';
+    else if (gDeg < 50) gammaEl.style.color = '#EF6C00';
+    else gammaEl.style.color = '#2E7D32';
+
+    // Angular velocity ratio ω₄/ω₂
+    const dt2 = 0.001;
+    const pNext = solve(theta + dt2), pPrev = solve(theta - dt2);
+    if (pNext && pPrev) {
+        const t4n = Math.atan2(pNext.Cy, pNext.Cx - L.d);
+        const t4p = Math.atan2(pPrev.Cy, pPrev.Cx - L.d);
+        let dTheta4 = (t4n - t4p);
+        if (dTheta4 > Math.PI) dTheta4 -= 2*Math.PI;
+        if (dTheta4 < -Math.PI) dTheta4 += 2*Math.PI;
+        const ratio = dTheta4 / (2*dt2); // ω₄/ω₂ (since dθ₂ = 2*dt2)
+        document.getElementById('valRatio').textContent = ratio.toFixed(3);
+    }
+}
+
+// ========== ANIMATION LOOP ==========
+function animate() {
+    if (playing) {
+        theta += speed * Math.PI / 180;
+        if (theta >= Math.PI * 2) { theta -= Math.PI * 2; cTraceHistory = []; }
+        if (theta < 0) { theta += Math.PI * 2; cTraceHistory = []; }
+        const p = solve(theta);
+        if (p) cTraceHistory.push([p.Cx, p.Cy]);
+        if (cTraceHistory.length > 720) cTraceHistory.shift(); // limit memory
+        document.getElementById('angleSlider').value = (theta * 180 / Math.PI).toFixed(1);
+    }
+    draw();
+    requestAnimationFrame(animate);
+}
+
+// ========== CONTROLS ==========
+document.getElementById('btnPlay').addEventListener('click', function() {
+    playing = !playing;
+    this.textContent = playing ? '⏸' : '▶';
+});
+
+document.getElementById('btnStepFwd').addEventListener('click', () => {
+    playing = false;
+    document.getElementById('btnPlay').textContent = '▶';
+    theta += Math.PI / 180;
+    if (theta >= Math.PI*2) theta -= Math.PI*2;
+    document.getElementById('angleSlider').value = (theta*180/Math.PI).toFixed(1);
+});
+
+document.getElementById('btnStepBack').addEventListener('click', () => {
+    playing = false;
+    document.getElementById('btnPlay').textContent = '▶';
+    theta -= Math.PI / 180;
+    if (theta < 0) theta += Math.PI*2;
+    document.getElementById('angleSlider').value = (theta*180/Math.PI).toFixed(1);
+});
+
+document.getElementById('btnFwd').addEventListener('click', () => {
+    playing = false;
+    document.getElementById('btnPlay').textContent = '▶';
+    theta += 10 * Math.PI / 180;
+    if (theta >= Math.PI*2) theta -= Math.PI*2;
+    document.getElementById('angleSlider').value = (theta*180/Math.PI).toFixed(1);
+});
+
+document.getElementById('btnBack').addEventListener('click', () => {
+    playing = false;
+    document.getElementById('btnPlay').textContent = '▶';
+    theta -= 10 * Math.PI / 180;
+    if (theta < 0) theta += Math.PI*2;
+    document.getElementById('angleSlider').value = (theta*180/Math.PI).toFixed(1);
+});
+
+document.getElementById('angleSlider').addEventListener('input', function() {
+    playing = false;
+    document.getElementById('btnPlay').textContent = '▶';
+    theta = parseFloat(this.value) * Math.PI / 180;
+    cTraceHistory = [];
+});
+
+document.getElementById('speedSlider').addEventListener('input', function() {
+    speed = parseFloat(this.value);
+});
+
+// Toggles
+document.querySelectorAll('.toggle-chip').forEach(chip => {
+    chip.addEventListener('click', function() {
+        this.classList.toggle('active');
+        const key = this.dataset.key;
+        if (key === 'trace') showTrace = this.classList.contains('active');
+        if (key === 'angles') showAngles = this.classList.contains('active');
+        if (key === 'vectors') showVectors = this.classList.contains('active');
+    });
+});
+
+// ========== KNOWLEDGE CARDS ==========
+let cardIndex = 0;
+const totalCards = document.querySelectorAll('.card').length;
+const track = document.getElementById('cardTrack');
+
+function updateCards() {
+    track.style.transform = `translateX(-${cardIndex * 100}%)`;
+    document.getElementById('cardIdx').textContent = `${cardIndex+1} / ${totalCards}`;
+    document.getElementById('cardPrev').disabled = cardIndex === 0;
+    document.getElementById('cardNext').disabled = cardIndex === totalCards - 1;
+}
+
+document.getElementById('cardPrev').addEventListener('click', () => {
+    if (cardIndex > 0) { cardIndex--; updateCards(); }
+});
+document.getElementById('cardNext').addEventListener('click', () => {
+    if (cardIndex < totalCards - 1) { cardIndex++; updateCards(); }
+});
+
+// Touch swipe for cards
+let touchStartX = 0;
+const viewport = document.querySelector('.card-viewport');
+viewport.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; });
+viewport.addEventListener('touchend', e => {
+    const diff = touchStartX - e.changedTouches[0].clientX;
+    if (diff > 50 && cardIndex < totalCards-1) { cardIndex++; updateCards(); }
+    else if (diff < -50 && cardIndex > 0) { cardIndex--; updateCards(); }
+});
+
+// ========== START ==========
+animate();
+</script>
+</body>
+</html>
