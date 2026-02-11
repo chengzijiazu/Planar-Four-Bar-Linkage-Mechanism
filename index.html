@@ -2,173 +2,1602 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-<title>平面四杆机构 · 交互式教学</title>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=no">
+<title>曲柄摇杆机构 - 交互式教学</title>
 <style>
-:root {
-    --bg: #ffffff;
-    --card-bg: #f7f7f8;
-    --text: #1a1a1a;
-    --text2: #888;
-    --border: #e8e8e8;
-    --accent: #0C8CE9;
-    --radius: 16px;
-}
-* { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-html, body {
-    width: 100%; min-height: 100vh;
-    background: var(--bg); color: var(--text);
-    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", "Helvetica Neue", sans-serif;
-}
-.app {
-    max-width: 480px; margin: 0 auto;
-    padding: 0 20px; min-height: 100vh;
-    display: flex; flex-direction: column;
-    justify-content: center;
-}
-.header {
-    text-align: center; padding: 48px 0 36px;
-}
-.header h1 {
-    font-size: 28px; font-weight: 800; letter-spacing: 0.5px;
-    line-height: 1.3;
-}
-.header p {
-    font-size: 14px; color: var(--text2); margin-top: 8px;
-    line-height: 1.6;
-}
-.tags {
-    display: flex; justify-content: center; flex-wrap: wrap;
-    gap: 8px; margin-top: 16px;
-}
-.tag {
-    display: inline-block; padding: 4px 14px;
-    border-radius: 20px; font-size: 12px;
-    border: 1px solid var(--border); color: var(--text2);
-    background: var(--card-bg);
-}
-.cards { display: flex; flex-direction: column; gap: 16px; padding-bottom: 48px; }
-.card {
-    display: block; text-decoration: none; color: var(--text);
-    background: var(--card-bg); border-radius: var(--radius);
-    padding: 28px 24px; border: 1px solid var(--border);
-    transition: all 0.2s ease;
-}
-.card:active { transform: scale(0.98); background: #f0f0f0; }
-.card-icon {
-    width: 48px; height: 48px; border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 24px; margin-bottom: 16px;
-}
-.card-icon-1 { background: #e8f4fd; }
-.card-icon-2 { background: #e8fde8; }
-.card h2 { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
-.card p { font-size: 13px; color: var(--text2); line-height: 1.6; }
-.card .arrow {
-    display: flex; align-items: center; gap: 4px;
-    margin-top: 16px; font-size: 13px; font-weight: 600;
-    color: var(--accent);
-}
-.footer {
-    text-align: center; padding: 24px 0 32px;
-    font-size: 12px; color: #ccc;
-}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Segoe UI',sans-serif;background:#fff;color:#1a1a1a}
+#app{width:100%;height:100%;display:flex;flex-direction:column}
+#cards{flex:1;position:relative;overflow:hidden}
+.card{position:absolute;top:0;left:0;width:100%;height:100%;padding:20px 20px 0;display:flex;flex-direction:column;transition:transform .45s cubic-bezier(.4,0,.2,1),opacity .45s ease;will-change:transform,opacity}
+.card.pos-right{transform:translateX(100%);opacity:0;pointer-events:none}
+.card.pos-center{transform:translateX(0);opacity:1}
+.card.pos-left{transform:translateX(-100%);opacity:0;pointer-events:none}
+.card-title{font-size:22px;font-weight:700;letter-spacing:.5px;margin-bottom:4px;color:#1a1a1a}
+.card-subtitle{font-size:13px;color:#888;margin-bottom:12px;font-weight:400}
+.card-body{flex:1;display:flex;flex-direction:column;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:10px}
+.svg-wrap{width:100%;display:flex;justify-content:center;margin:4px 0;flex-shrink:0}
+.svg-wrap svg{width:100%;max-width:400px}
+.card-text{font-size:14px;line-height:1.75;color:#333;padding:0 2px}
+.card-text p{margin-bottom:10px}
+.formula{background:#f5f5f5;border-radius:8px;padding:12px 16px;margin:10px 0;font-size:15px;text-align:center;font-family:'Times New Roman',serif;letter-spacing:1px;border:1px solid #eee}
+.highlight{color:#0C8CE9;font-weight:600}
+.key-point{background:#f0f8ff;border-left:3px solid #0C8CE9;padding:10px 14px;margin:10px 0;border-radius:0 8px 8px 0;font-size:13px;line-height:1.7}
+.tag{display:inline-block;padding:2px 10px;border-radius:20px;font-size:12px;margin:2px 4px 2px 0;border:1px solid #ddd;color:#555}
+.tag-blue{background:#e8f4fd;border-color:#b3d9f2;color:#0C8CE9}
+.tag-red{background:#fde8e8;border-color:#f2b3b3;color:#d93025}
+.tag-green{background:#e8fde8;border-color:#b3f2b3;color:#1e8e3e}
 
-/* Simple SVG animation for hero */
-.hero-svg { width: 100%; max-width: 280px; margin: 0 auto 8px; display: block; }
+/* Navigation */
+#nav{height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;border-top:1px solid #f0f0f0;background:#fff;flex-shrink:0}
+.nav-btn{display:flex;align-items:center;gap:6px;padding:10px 20px;border:none;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit}
+.nav-btn:active{transform:scale(.96)}
+#prevBtn{background:#f5f5f5;color:#666}
+#prevBtn:disabled{opacity:.3;pointer-events:none}
+#nextBtn{background:#1a1a1a;color:#fff}
+#nextBtn:disabled{opacity:.3}
+#dots{display:flex;gap:6px;align-items:center}
+.dot{width:6px;height:6px;border-radius:50%;background:#ddd;transition:all .3s}
+.dot.active{width:20px;border-radius:3px;background:#1a1a1a}
+
+/* Slider */
+.angle-slider-wrap{display:flex;align-items:center;gap:10px;padding:4px 10px;margin:6px 0}
+.angle-slider{-webkit-appearance:none;appearance:none;flex:1;height:4px;border-radius:2px;background:#e0e0e0;outline:none}
+.angle-slider::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#1a1a1a;cursor:grab;border:3px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.slider-label{font-size:12px;color:#999;min-width:36px;text-align:center;font-variant-numeric:tabular-nums}
+
+/* Controls */
+.ctrl-row{display:flex;gap:8px;margin:6px 0;flex-wrap:wrap}
+.ctrl-btn{padding:6px 14px;border:1.5px solid #ddd;border-radius:8px;background:#fff;font-size:13px;cursor:pointer;transition:all .2s;font-family:inherit;color:#555}
+.ctrl-btn:active{transform:scale(.96)}
+.ctrl-btn.active{border-color:#0C8CE9;color:#0C8CE9;background:#f0f8ff}
+
+/* Lab sliders */
+.lab-param{display:flex;align-items:center;gap:8px;margin:4px 0;font-size:13px}
+.lab-param label{min-width:60px;color:#666}
+.lab-param input[type=range]{flex:1;height:3px;-webkit-appearance:none;appearance:none;background:#e0e0e0;border-radius:2px;outline:none}
+.lab-param input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:#1a1a1a;cursor:pointer;border:2px solid #fff;box-shadow:0 1px 3px rgba(0,0,0,.25)}
+.lab-param .val{min-width:32px;text-align:right;font-variant-numeric:tabular-nums;color:#0C8CE9;font-weight:600}
+
+/* Info bar */
+.info-bar{display:flex;justify-content:space-around;background:#fafafa;border-radius:8px;padding:8px 4px;margin:6px 0;border:1px solid #f0f0f0}
+.info-item{text-align:center}
+.info-item .info-label{font-size:11px;color:#999}
+.info-item .info-value{font-size:16px;font-weight:700;font-variant-numeric:tabular-nums;color:#1a1a1a}
+.info-item .info-value.warn{color:#f59e0b}
+.info-item .info-value.bad{color:#d93025}
+.info-item .info-value.good{color:#1e8e3e}
+
+/* Drag hint */
+.drag-hint{text-align:center;font-size:12px;color:#aaa;margin:4px 0;animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* Title card hero */
+.hero-title{font-size:32px;font-weight:800;letter-spacing:1px;margin:20px 0 6px;text-align:center}
+.hero-sub{font-size:15px;color:#666;text-align:center;margin-bottom:16px;line-height:1.6}
+.hero-tags{display:flex;justify-content:center;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+
+/* Ghost mechanism */
+.ghost-link{opacity:.15}
+.ghost-joint{opacity:.15}
+
+/* Extreme position highlight */
+.extreme-arc{fill:none;stroke-width:2;opacity:.7}
+
+/* Touch handling */
+svg{touch-action:none}
+.angle-slider{touch-action:none}
+
+/* Scrollbar hide */
+.card-body::-webkit-scrollbar{display:none}
+.card-body{scrollbar-width:none}
+
+/* Bar chart for Grashof comparison */
+.bar-chart{display:flex;align-items:flex-end;gap:10px;justify-content:center;padding:8px 12px;margin:6px 0}
+.bar-col{display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar-rect{width:42px;border-radius:6px 6px 2px 2px;transition:height .5s cubic-bezier(.4,0,.2,1);min-height:8px}
+.bar-label{font-size:11px;color:#999;font-weight:500}
+.bar-value{font-size:12px;font-weight:700;color:#1a1a1a}
+
+/* Mechanism type badge */
+.mech-badge{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:12px;font-size:13px;font-weight:600;margin:4px 0}
+.mech-badge-blue{background:linear-gradient(135deg,#e8f4fd,#d0ebff);color:#0C8CE9;border:1px solid #b3d9f2}
+.mech-badge-green{background:linear-gradient(135deg,#e8fde8,#d0ffd0);color:#1e8e3e;border:1px solid #b3f2b3}
+.mech-badge-orange{background:linear-gradient(135deg,#fff3e0,#ffe0b2);color:#e65100;border:1px solid #ffcc80}
+
+/* Comparison table */
+.compare-row{display:flex;align-items:center;gap:8px;padding:8px 12px;margin:3px 0;border-radius:8px;background:#fafafa;border:1px solid #f0f0f0;font-size:13px}
+.compare-row .cr-icon{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.compare-row .cr-text{flex:1;line-height:1.5}
+.compare-row .cr-arrow{color:#ccc;font-size:16px;flex-shrink:0}
+.compare-row .cr-result{font-weight:700;font-size:13px;flex-shrink:0}
+
+/* Shortest bar highlight pulse */
+@keyframes shortPulse{0%,100%{stroke-width:3}50%{stroke-width:5.5}}
+.shortest-bar-pulse{animation:shortPulse 1.5s infinite}
+
+/* Legend in SVG cards */
+.svg-legend{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin:4px 0;padding:4px 8px}
+.svg-legend-item{display:flex;align-items:center;gap:4px;font-size:11px;color:#666}
+.svg-legend-dot{width:10px;height:10px;border-radius:2px}
+
+/* Card 4 visualization pack */
+.grashof-visual-pack{margin-top:10px;padding:10px;border:1px solid #e4edf7;border-radius:12px;background:linear-gradient(180deg,#fcfdff,#f7faff)}
+.grashof-visual-title{font-size:13px;font-weight:700;color:#334155;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.mini-mech-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:4px}
+.mini-mech-card{border:1px solid #e5eaf1;border-radius:10px;padding:6px;background:#fff}
+.mini-mech-title{font-size:12px;font-weight:700;line-height:1.35}
+.mini-mech-sub{font-size:11px;color:#64748b;margin:2px 0 4px}
+.mini-mech-card svg{width:100%;height:124px;display:block;background:#fbfdff;border:1px solid #edf2f7;border-radius:8px}
+.mini-chip-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:6px}
+.mini-chip{display:inline-block;padding:1px 6px;border-radius:999px;border:1px solid #d6dde6;background:#f8fafc;color:#475569;font-size:10px;line-height:1.5}
+.mini-chip-blue{background:#e8f4fd;border-color:#b3d9f2;color:#0C8CE9}
+.mini-chip-green{background:#e8fde8;border-color:#b3f2b3;color:#1e8e3e}
+.mini-chip-orange{background:#fff3e0;border-color:#ffcc80;color:#e65100}
+.mini-map-wrap{margin-top:8px;border:1px solid #edf2f7;border-radius:10px;background:#fff;padding:8px}
+.mini-map-title{text-align:center;font-size:11px;color:#64748b;margin-bottom:4px}
+.mini-map-wrap svg{width:100%;display:block}
+@media (max-width:720px){
+  .mini-mech-grid{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
-<div class="app">
-    <div class="header">
-        <svg class="hero-svg" viewBox="0 0 280 160" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <line x1="60" y1="120" x2="220" y2="120" stroke="#e0e0e0" stroke-width="1.5" stroke-dasharray="6,4"/>
-            <line id="h-crank" x1="60" y1="120" x2="100" y2="70" stroke="#0C8CE9" stroke-width="3" stroke-linecap="round"/>
-            <line id="h-coupler" x1="100" y1="70" x2="200" y2="60" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>
-            <line id="h-rocker" x1="220" y1="120" x2="200" y2="60" stroke="#1e8e3e" stroke-width="3" stroke-linecap="round"/>
-            <circle cx="60" cy="120" r="5" fill="#1a1a1a" stroke="#fff" stroke-width="1.5"/>
-            <circle cx="220" cy="120" r="5" fill="#1a1a1a" stroke="#fff" stroke-width="1.5"/>
-            <circle id="h-jB" cx="100" cy="70" r="4.5" fill="#fff" stroke="#0C8CE9" stroke-width="2"/>
-            <circle id="h-jC" cx="200" cy="60" r="4.5" fill="#fff" stroke="#1e8e3e" stroke-width="2"/>
-            <text x="52" y="138" font-size="12" fill="#999" text-anchor="middle" font-family="sans-serif">A</text>
-            <text x="228" y="138" font-size="12" fill="#999" text-anchor="middle" font-family="sans-serif">D</text>
-        </svg>
-        <h1>平面四杆机构<br>交互式教学</h1>
-        <p>Planar Four-Bar Linkage Mechanism</p>
-        <div class="tags">
-            <span class="tag">运动分析</span>
-            <span class="tag">Grashof 定理</span>
-            <span class="tag">传动角</span>
-            <span class="tag">急回特性</span>
-        </div>
+<div id="app">
+<div id="cards">
+
+<!-- Card 0: Title -->
+<div class="card pos-center" id="card-0">
+  <div class="card-body" style="justify-content:center;align-items:center">
+    <div class="hero-title">曲柄摇杆机构</div>
+    <div class="hero-sub">平面四杆机构中最基本、最常用的一种<br>通过交互动画，逐步掌握其核心原理</div>
+    <div class="hero-tags">
+      <span class="tag tag-blue">运动分析</span>
+      <span class="tag tag-green">Grashof定理</span>
+      <span class="tag tag-red">急回特性</span>
+      <span class="tag">传动角</span>
+      <span class="tag">死点</span>
     </div>
-
-    <div class="cards">
-        <a class="card" href="four_bar_linkage.html">
-            <div class="card-icon card-icon-1">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0C8CE9" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4m0 12v4M2 12h4m12 0h4"/></svg>
-            </div>
-            <h2>铰链四杆机构运动分析</h2>
-            <p>Canvas 动画演示，支持播放控制、角度滑块、轨迹追踪、力与速度向量显示，附带五个知识要点卡片。</p>
-            <div class="arrow">进入演示 →</div>
-        </a>
-
-        <a class="card" href="曲柄摇杆机构.html">
-            <div class="card-icon card-icon-2">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1e8e3e" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="3"/><path d="M8 12h8M12 8v8"/></svg>
-            </div>
-            <h2>曲柄摇杆机构 · 交互式教学</h2>
-            <p>九张卡片式全流程教学，涵盖机构组成、Grashof 条件、极限位置与急回特性、传动角、死点位置及自由实验台。支持拖拽交互。</p>
-            <div class="arrow">开始学习 →</div>
-        </a>
-    </div>
-
-    <div class="footer">Planar Four-Bar Linkage Mechanism</div>
+    <div class="svg-wrap"><svg id="svg0" viewBox="0 0 380 260"></svg></div>
+    <div class="drag-hint">自动演示中 · 点击下一张开始学习</div>
+  </div>
 </div>
 
+<!-- Card 1: Components -->
+<div class="card pos-right" id="card-1">
+  <div class="card-title">认识四杆机构</div>
+  <div class="card-subtitle">四个构件 · 四个运动副 · 一个自由度</div>
+  <div class="card-body">
+    <div class="svg-wrap"><svg id="svg1" viewBox="0 0 380 260"></svg></div>
+    <div class="card-text">
+      <p>平面四杆机构由<span class="highlight">四个刚性构件</span>通过<span class="highlight">四个低副（转动副）</span>依次连接而成，构成封闭的运动链。</p>
+      <p><b>各构件名称：</b></p>
+      <p>
+        <span class="tag">① 机架</span> 固定不动的构件（AD）<br>
+        <span class="tag tag-blue">② 曲柄</span> 能做整周回转的连架杆（AB）<br>
+        <span class="tag">③ 连杆</span> 不与机架直接相连的构件（BC）<br>
+        <span class="tag tag-green">④ 摇杆</span> 只能做往复摆动的连架杆（DC）
+      </p>
+      <div class="key-point">连架杆：与机架相连的构件（曲柄、摇杆）<br>连杆：不与机架直接相连，做复杂平面运动</div>
+    </div>
+  </div>
+</div>
+
+<!-- Card 2: Motion Demo -->
+<div class="card pos-right" id="card-2">
+  <div class="card-title">运动演示</div>
+  <div class="card-subtitle">观察各构件的运动特性</div>
+  <div class="card-body">
+    <div class="svg-wrap"><svg id="svg2" viewBox="0 0 380 260"></svg></div>
+    <div class="ctrl-row" id="ctrl2">
+      <button class="ctrl-btn active" onclick="toggleAnim(2)">▶ 播放</button>
+      <button class="ctrl-btn" onclick="toggleTrace(2)">轨迹</button>
+      <button class="ctrl-btn" onclick="resetTrace(2)">清除轨迹</button>
+    </div>
+    <div class="angle-slider-wrap">
+      <span class="slider-label">0°</span>
+      <input type="range" class="angle-slider" id="slider2" min="0" max="360" value="0">
+      <span class="slider-label" id="sliderVal2">0°</span>
+    </div>
+    <div class="card-text">
+      <p><span class="highlight">曲柄</span>做匀速整周转动，<span class="highlight">摇杆</span>在两极限位置间往复摆动，<span class="highlight">连杆</span>做复杂的平面运动。</p>
+      <div class="key-point">拖动滑块可逐帧分析机构在任意位置的状态</div>
+    </div>
+  </div>
+</div>
+
+<!-- Card 3: Interactive Drag -->
+<div class="card pos-right" id="card-3">
+  <div class="card-title">动手试试</div>
+  <div class="card-subtitle">拖动曲柄端点 · 感受传动关系</div>
+  <div class="card-body">
+    <div class="svg-wrap"><svg id="svg3" viewBox="0 0 380 260"></svg></div>
+    <div class="drag-hint">👆 拖动蓝色圆点来转动曲柄</div>
+    <div class="info-bar" id="info3">
+      <div class="info-item"><div class="info-label">曲柄角</div><div class="info-value" id="info3-theta">0°</div></div>
+      <div class="info-item"><div class="info-label">摇杆角</div><div class="info-value" id="info3-phi">0°</div></div>
+      <div class="info-item"><div class="info-label">传动角</div><div class="info-value" id="info3-mu">0°</div></div>
+    </div>
+    <div class="card-text">
+      <p>通过拖动曲柄，直观感受：</p>
+      <p>· 摇杆摆动<b>不均匀</b>——曲柄匀速转动时，摇杆时快时慢<br>
+         · 传动角<b>不断变化</b>——影响力的传递效率<br>
+         · 连杆上各点的运动轨迹各不相同</p>
+    </div>
+  </div>
+</div>
+
+<!-- Card 4: Grashof's Condition Overview -->
+<div class="card pos-right" id="card-4">
+  <div class="card-title">曲柄存在条件</div>
+  <div class="card-subtitle">Grashof 定理 · 杆长条件</div>
+  <div class="card-body">
+    <div class="svg-wrap"><svg id="svg4" viewBox="0 0 380 240"></svg></div>
+    <div class="card-text">
+      <div class="formula">s + l ≤ p + q</div>
+      <p>其中 <b>s</b> 为最短杆，<b>l</b> 为最长杆，<b>p</b>、<b>q</b> 为其余两杆。</p>
+      <div class="bar-chart" id="grashofBars">
+        <div class="bar-col"><div class="bar-value" id="gb-s-v">55</div><div class="bar-rect" id="gb-s" style="height:36px;background:#0C8CE9"></div><div class="bar-label">s 最短</div></div>
+        <div class="bar-col"><div class="bar-value" id="gb-q-v">100</div><div class="bar-rect" id="gb-q" style="height:66px;background:#999"></div><div class="bar-label">p</div></div>
+        <div class="bar-col"><div class="bar-value" id="gb-p-v">140</div><div class="bar-rect" id="gb-p" style="height:93px;background:#999"></div><div class="bar-label">q</div></div>
+        <div class="bar-col"><div class="bar-value" id="gb-l-v">150</div><div class="bar-rect" id="gb-l" style="height:100px;background:#d93025"></div><div class="bar-label">l 最长</div></div>
+      </div>
+      <div class="info-bar">
+        <div class="info-item"><div class="info-label">s + l</div><div class="info-value" style="color:#0C8CE9">205</div></div>
+        <div class="info-item"><div class="info-label">比较</div><div class="info-value good">≤</div></div>
+        <div class="info-item"><div class="info-label">p + q</div><div class="info-value" style="color:#1e8e3e">240</div></div>
+      </div>
+      <p><b>满足杆长条件时，根据最短杆的位置不同：</b></p>
+      <div class="compare-row" style="border-left:3px solid #0C8CE9">
+        <div class="cr-icon" style="background:#e8f4fd;color:#0C8CE9">①</div>
+        <div class="cr-text">最短杆为<b>连架杆</b></div>
+        <div class="cr-arrow">→</div>
+        <div class="cr-result" style="color:#0C8CE9">曲柄摇杆</div>
+      </div>
+      <div class="compare-row" style="border-left:3px solid #1e8e3e">
+        <div class="cr-icon" style="background:#e8fde8;color:#1e8e3e">②</div>
+        <div class="cr-text">最短杆为<b>机架</b></div>
+        <div class="cr-arrow">→</div>
+        <div class="cr-result" style="color:#1e8e3e">双曲柄</div>
+      </div>
+      <div class="compare-row" style="border-left:3px solid #e65100">
+        <div class="cr-icon" style="background:#fff3e0;color:#e65100">③</div>
+        <div class="cr-text">最短杆为<b>连杆</b></div>
+        <div class="cr-arrow">→</div>
+        <div class="cr-result" style="color:#e65100">双摇杆</div>
+      </div>
+      <div class="grashof-visual-pack">
+        <div class="grashof-visual-title">三种机构同步图形演示（满足 s + l ≤ p + q）</div>
+        <div class="ctrl-row">
+          <button class="ctrl-btn active" id="btn4-mini-play" onclick="toggleCard4MiniAnim(this)">⏸ 同步动画</button>
+          <button class="ctrl-btn" id="btn4-mini-trace" onclick="toggleCard4MiniTrace(this)">显示轨迹</button>
+          <button class="ctrl-btn" onclick="resetCard4MiniTrace()">清除轨迹</button>
+        </div>
+        <div class="mini-mech-grid">
+          <div class="mini-mech-card">
+            <div class="mini-mech-title" style="color:#0C8CE9">① 曲柄摇杆机构</div>
+            <div class="mini-mech-sub">最短杆在连架杆（a）</div>
+            <svg id="svg4mini-cr" viewBox="0 0 260 170"></svg>
+            <div class="mini-chip-row">
+              <span class="mini-chip mini-chip-blue">1 构件整周回转</span>
+              <span class="mini-chip">1 构件往复摆动</span>
+            </div>
+          </div>
+          <div class="mini-mech-card">
+            <div class="mini-mech-title" style="color:#1e8e3e">② 双曲柄机构</div>
+            <div class="mini-mech-sub">最短杆在机架（d）</div>
+            <svg id="svg4mini-dc" viewBox="0 0 260 170"></svg>
+            <div class="mini-chip-row">
+              <span class="mini-chip mini-chip-green">2 构件整周回转</span>
+              <span class="mini-chip">连杆作平面运动</span>
+            </div>
+          </div>
+          <div class="mini-mech-card">
+            <div class="mini-mech-title" style="color:#e65100">③ 双摇杆机构</div>
+            <div class="mini-mech-sub">最短杆在连杆（b）</div>
+            <svg id="svg4mini-dr" viewBox="0 0 260 170"></svg>
+            <div class="mini-chip-row">
+              <span class="mini-chip mini-chip-orange">2 构件往复摆动</span>
+              <span class="mini-chip">最短杆可整周回转</span>
+            </div>
+          </div>
+        </div>
+        <div class="mini-map-wrap">
+          <div class="mini-map-title">最短杆位置差异示意（蓝=曲柄摇杆，绿=双曲柄，橙=双摇杆）</div>
+          <svg id="svg4posmap" viewBox="0 0 380 130"></svg>
+        </div>
+      </div>
+      <div class="drag-hint" style="margin-top:8px">上方可同步对比三种机构，下一页继续逐一深入 →</div>
+    </div>
+  </div>
+</div>
+
+<!-- Card 5: Crank-Rocker Demo -->
+<div class="card pos-right" id="card-5">
+  <div class="card-title">① 曲柄摇杆机构</div>
+  <div class="card-subtitle">最短杆为连架杆 · 该连架杆为曲柄</div>
+  <div class="card-body">
+    <div class="svg-wrap"><svg id="svg5cr" viewBox="0 0 380 280"></svg></div>
+    <div class="svg-legend">
+      <div class="svg-legend-item"><div class="svg-legend-dot" style="background:#0C8CE9"></div>曲柄(最短)</div>
+      <div class="svg-legend-item"><div class="svg-legend-dot" style="background:#666"></div>连杆</div>
+      <div class="svg-legend-item"><div class="svg-legend-dot" style="background:#1e8e3e"></div>摇杆</div>
+      <div class="svg-legend-item"><div class="svg-legend-dot" style="background:#aaa"></div>机架</div>
+    </div>
+    <div class="ctrl-row">
+      <button class="ctrl-btn active" onclick="toggleAnim('5cr')">⏸ 暂停</button>
+      <button class="ctrl-btn" onclick="toggleTrace('5cr')">轨迹</button>
+    </div>
+    <div class="info-bar" id="info5cr">
+      <div class="info-item"><div class="info-label">a(曲柄)</div><div class="info-value" style="color:#0C8CE9" id="info5cr-a">55</div></div>
+      <div class="info-item"><div class="info-label">b(连杆)</div><div class="info-value" id="info5cr-b">150</div></div>
+      <div class="info-item"><div class="info-label">c(摇杆)</div><div class="info-value" style="color:#1e8e3e" id="info5cr-c">100</div></div>
+      <div class="info-item"><div class="info-label">d(机架)</div><div class="info-value" id="info5cr-d">140</div></div>
+    </div>
+    <div class="card-text">
+      <div class="mech-badge mech-badge-blue">🔄 曲柄做整周转动 · 摇杆往复摆动</div>
+      <p><span class="highlight">最短杆 a = 55</span> 作为连架杆，能够整周回转成为<b>曲柄</b>。与其相邻的另一连架杆（摇杆）只能摆动。</p>
+      <div class="key-point">判定逻辑：最短杆与机架<b>相邻</b>→ 最短杆为曲柄<br>另一侧连架杆只能摆动 → 形成曲柄摇杆机构</div>
+    </div>
+  </div>
+</div>
+
+<!-- Card 6: Double-Crank Demo -->
+<div class="card pos-right" id="card-6">
+  <div class="card-title">② 双曲柄机构</div>
+  <div class="card-subtitle">最短杆为机架 · 两连架杆均为曲柄</div>
+  <div class="card-body">
+    <div class="svg-wrap"><svg id="svg6dc" viewBox="0 0 380 280"></svg></div>
+    <div class="svg-legend">
+      <div class="svg-legend-item"><div class="svg-legend-dot" style="background:#0C8CE9"></div>曲柄1</div>
+      <div class="svg-legend-item"><div class="svg-legend-dot" style="background:#666"></div>连杆</div>
+      <div class="svg-legend-item"><div class="svg-legend-dot" style="background:#1e8e3e"></div>曲柄2</div>
+      <div class="svg-legend-item"><div class="svg-legend-dot" style="background:#e65100"></div>机架(最短)</div>
+    </div>
+    <div class="ctrl-row">
+      <button class="ctrl-btn active" onclick="toggleAnim('6dc')">⏸ 暂停</button>
+      <button class="ctrl-btn" onclick="toggleTrace('6dc')">轨迹</button>
+    </div>
+    <div class="info-bar" id="info6dc">
+      <div class="info-item"><div class="info-label">a(曲柄1)</div><div class="info-value" style="color:#0C8CE9" id="info6dc-a">100</div></div>
+      <div class="info-item"><div class="info-label">b(连杆)</div><div class="info-value" id="info6dc-b">150</div></div>
+      <div class="info-item"><div class="info-label">c(曲柄2)</div><div class="info-value" style="color:#1e8e3e" id="info6dc-c">120</div></div>
+      <div class="info-item"><div class="info-label">d(机架)</div><div class="info-value" style="color:#e65100" id="info6dc-d">60</div></div>
+    </div>
+    <div class="card-text">
+      <div class="mech-badge mech-badge-green">🔄🔄 两个连架杆均做整周转动</div>
+      <p><span class="highlight">最短杆 d = 60</span> 作为机架。与机架相邻的两个连架杆都能做<b>整周回转</b>，均为曲柄。</p>
+      <div class="key-point">判定逻辑：最短杆为<b>机架</b><br>与机架相邻的两个连架杆均可整周回转<br>→ 形成双曲柄机构（又称平行四边形机构）</div>
+    </div>
+  </div>
+</div>
+
+<!-- Card 7: Double-Rocker Demo -->
+<div class="card pos-right" id="card-7">
+  <div class="card-title">③ 双摇杆机构</div>
+  <div class="card-subtitle">最短杆为连杆 · 两连架杆均为摇杆</div>
+  <div class="card-body">
+    <div class="svg-wrap"><svg id="svg7dr" viewBox="0 0 380 280"></svg></div>
+    <div class="svg-legend">
+      <div class="svg-legend-item"><div class="svg-legend-dot" style="background:#0C8CE9"></div>摇杆1</div>
+      <div class="svg-legend-item"><div class="svg-legend-dot" style="background:#e65100"></div>连杆(最短)</div>
+      <div class="svg-legend-item"><div class="svg-legend-dot" style="background:#1e8e3e"></div>摇杆2</div>
+      <div class="svg-legend-item"><div class="svg-legend-dot" style="background:#aaa"></div>机架</div>
+    </div>
+    <div class="ctrl-row">
+      <button class="ctrl-btn active" onclick="toggleAnim('7dr')">⏸ 暂停</button>
+      <button class="ctrl-btn" onclick="toggleTrace('7dr')">轨迹</button>
+    </div>
+    <div class="info-bar" id="info7dr">
+      <div class="info-item"><div class="info-label">a(摇杆1)</div><div class="info-value" style="color:#0C8CE9" id="info7dr-a">100</div></div>
+      <div class="info-item"><div class="info-label">b(连杆)</div><div class="info-value" style="color:#e65100" id="info7dr-b">50</div></div>
+      <div class="info-item"><div class="info-label">c(摇杆2)</div><div class="info-value" style="color:#1e8e3e" id="info7dr-c">110</div></div>
+      <div class="info-item"><div class="info-label">d(机架)</div><div class="info-value" id="info7dr-d">140</div></div>
+    </div>
+    <div class="card-text">
+      <div class="mech-badge mech-badge-orange">↔️↔️ 两个连架杆均做往复摆动</div>
+      <p><span class="highlight">最短杆 b = 50</span> 作为连杆。两个与机架相邻的连架杆<b>都不能整周回转</b>，只能做往复摆动，均为摇杆。</p>
+      <div class="key-point">判定逻辑：最短杆为<b>连杆</b>（不与机架相邻）<br>两侧连架杆均不能整周回转<br>→ 形成双摇杆机构<br>注意：连杆本身可做整周回转！</div>
+    </div>
+  </div>
+</div>
+
+<!-- Card 8: Extreme Positions & Quick Return -->
+<div class="card pos-right" id="card-8">
+  <div class="card-title">极限位置与急回特性</div>
+  <div class="card-subtitle">极位夹角 θ · 行程速比系数 K</div>
+  <div class="card-body">
+    <div class="svg-wrap"><svg id="svg8" viewBox="0 0 380 270"></svg></div>
+    <div class="ctrl-row">
+      <button class="ctrl-btn active" onclick="toggleAnim(8)">▶ 播放</button>
+      <button class="ctrl-btn" onclick="showExtreme(1)">极限位置 I</button>
+      <button class="ctrl-btn" onclick="showExtreme(2)">极限位置 II</button>
+    </div>
+    <div class="card-text">
+      <p>曲柄与连杆<b>共线</b>时，摇杆到达<span class="highlight">极限位置</span>。</p>
+      <div class="formula">K = (180° + θ) / (180° - θ) ≈ 1.24</div>
+      <p><b>K > 1</b> 表示存在<span class="highlight">急回特性</span>：</p>
+      <p>· <span class="tag tag-blue">工作行程</span> 曲柄转过较大角度 → 速度<b>慢</b><br>
+         · <span class="tag tag-red">空回行程</span> 曲柄转过较小角度 → 速度<b>快</b></p>
+      <div class="key-point">急回特性在牛头刨床、摆动导杆机构等设备中有重要应用</div>
+    </div>
+  </div>
+</div>
+
+<!-- Card 9: Transmission Angle -->
+<div class="card pos-right" id="card-9">
+  <div class="card-title">传动角</div>
+  <div class="card-subtitle">μ 越大 · 传力性能越好</div>
+  <div class="card-body">
+    <div class="svg-wrap"><svg id="svg9" viewBox="0 0 380 260"></svg></div>
+    <div class="angle-slider-wrap">
+      <span class="slider-label">0°</span>
+      <input type="range" class="angle-slider" id="slider9" min="0" max="360" value="0">
+      <span class="slider-label" id="sliderVal9">0°</span>
+    </div>
+    <div class="info-bar" id="info9">
+      <div class="info-item"><div class="info-label">传动角 μ</div><div class="info-value good" id="info9-mu">—</div></div>
+      <div class="info-item"><div class="info-label">压力角 α</div><div class="info-value" id="info9-alpha">—</div></div>
+      <div class="info-item"><div class="info-label">μ_min</div><div class="info-value" id="info9-mumin">—</div></div>
+    </div>
+    <div class="card-text">
+      <p><span class="highlight">传动角 μ</span>：连杆与从动件（摇杆）在转动副处所夹的锐角。</p>
+      <p><span class="highlight">压力角 α = 90° − μ</span></p>
+      <div class="formula">设计准则：μ_min ≥ 40°</div>
+      <div class="key-point">μ = 90° 时传力效果最佳<br>μ 越小，分力中无用分力占比越大，效率越低</div>
+    </div>
+  </div>
+</div>
+
+<!-- Card 10: Dead Points -->
+<div class="card pos-right" id="card-10">
+  <div class="card-title">死点位置</div>
+  <div class="card-subtitle">当传动角 μ = 0° 时</div>
+  <div class="card-body">
+    <div class="svg-wrap"><svg id="svg10" viewBox="0 0 380 260"></svg></div>
+    <div class="ctrl-row">
+      <button class="ctrl-btn" onclick="showDead(1)">死点 I</button>
+      <button class="ctrl-btn" onclick="showDead(2)">死点 II</button>
+      <button class="ctrl-btn active" onclick="toggleAnim(10)">▶ 播放</button>
+    </div>
+    <div class="card-text">
+      <p>当<b>从动件（摇杆）为主动件</b>时，若摇杆与连杆<b>共线</b>，则曲柄上所受力通过其转动中心，<span class="highlight">无法驱动曲柄转动</span>。</p>
+      <p>此时 <b>μ = 0°</b>，机构处于<span class="highlight">死点</span>位置。</p>
+      <div class="key-point"><b>克服死点的方法：</b><br>
+      · 安装飞轮，利用惯性越过死点<br>
+      · 采用多缸或双机构错相位布置<br>
+      · 死点在某些场合也有利用价值（如夹具锁紧）</div>
+    </div>
+  </div>
+</div>
+
+<!-- Card 11: Lab -->
+<div class="card pos-right" id="card-11">
+  <div class="card-title">自由实验台</div>
+  <div class="card-subtitle">调节参数 · 探索机构特性</div>
+  <div class="card-body">
+    <div class="svg-wrap"><svg id="svg11" viewBox="0 0 380 260"></svg></div>
+    <div class="ctrl-row">
+      <button class="ctrl-btn active" onclick="toggleAnim(11)">▶ 播放</button>
+      <button class="ctrl-btn" onclick="toggleTrace(11)">轨迹</button>
+      <button class="ctrl-btn" onclick="resetTrace(11)">清除</button>
+    </div>
+    <div class="lab-param"><label>曲柄 a</label><input type="range" id="lab-a" min="20" max="80" value="55"><span class="val" id="lab-a-v">55</span></div>
+    <div class="lab-param"><label>连杆 b</label><input type="range" id="lab-b" min="60" max="200" value="150"><span class="val" id="lab-b-v">150</span></div>
+    <div class="lab-param"><label>摇杆 c</label><input type="range" id="lab-c" min="40" max="160" value="100"><span class="val" id="lab-c-v">100</span></div>
+    <div class="lab-param"><label>机架 d</label><input type="range" id="lab-d" min="60" max="200" value="140"><span class="val" id="lab-d-v">140</span></div>
+    <div class="info-bar" id="info11">
+      <div class="info-item"><div class="info-label">Grashof</div><div class="info-value good" id="info11-grashof">✓</div></div>
+      <div class="info-item"><div class="info-label">类型</div><div class="info-value" id="info11-type" style="font-size:12px">曲柄摇杆</div></div>
+      <div class="info-item"><div class="info-label">μ_min</div><div class="info-value" id="info11-mumin">—</div></div>
+      <div class="info-item"><div class="info-label">K</div><div class="info-value" id="info11-k">—</div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /cards -->
+
+<div id="nav">
+  <button class="nav-btn" id="prevBtn" disabled onclick="go(-1)">← 上一张</button>
+  <div id="dots"></div>
+  <button class="nav-btn" id="nextBtn" onclick="go(1)">下一张 →</button>
+</div>
+</div><!-- /app -->
+
 <script>
-// Simple hero animation
-const a = 55, b = 150, c = 100, d = 160;
-const Ax = 60, Ay = 120, Dx = 220, Dy = 120;
-const scale = 0.62;
-let theta = 0;
-
-function solve(th) {
-    const Bx = Ax + a * scale * Math.cos(th);
-    const By = Ay - a * scale * Math.sin(th);
+// ============ CORE: Four-bar linkage solver ============
+function solveFB(theta, a, b, c, d, Ax, Ay) {
+    const Dx = Ax + d, Dy = Ay;
+    const Bx = Ax + a * Math.cos(theta);
+    const By = Ay + a * Math.sin(theta);
     const ddx = Dx - Bx, ddy = Dy - By;
-    const BD = Math.sqrt(ddx * ddx + ddy * ddy);
-    const bS = b * scale, cS = c * scale;
-    if (BD > bS + cS || BD < Math.abs(bS - cS)) return null;
-    const cosB = (BD * BD + bS * bS - cS * cS) / (2 * BD * bS);
-    const angBD = Math.atan2(ddy, ddx);
+    const BD = Math.sqrt(ddx*ddx + ddy*ddy);
+    if (BD > b + c - 0.01 || BD < Math.abs(b - c) + 0.01) return null;
+    const aBD = Math.atan2(ddy, ddx);
+    const cosB = (BD*BD + b*b - c*c) / (2*BD*b);
     const angB = Math.acos(Math.max(-1, Math.min(1, cosB)));
-    const Cx = Bx + bS * Math.cos(angBD - angB);
-    const Cy = By + bS * Math.sin(angBD - angB);
-    return { Bx, By, Cx, Cy };
+    const aBC = aBD - angB;
+    const Cx = Bx + b * Math.cos(aBC);
+    const Cy = By + b * Math.sin(aBC);
+    // Transmission angle
+    const CBx = Bx-Cx, CBy = By-Cy, CDx = Dx-Cx, CDy = Dy-Cy;
+    const dot = CBx*CDx + CBy*CDy;
+    let mu = Math.acos(Math.max(-1, Math.min(1, dot/(b*c))));
+    if (mu > Math.PI/2) mu = Math.PI - mu;
+    // Rocker angle from frame (above frame is negative in SVG)
+    const rockAng = Math.atan2(Cy-Dy, Cx-Dx);
+    return {Bx,By,Cx,Cy,Dx,Dy,mu,rockAng,aBC};
 }
 
-function animate() {
-    theta += 0.015;
-    if (theta > Math.PI * 2) theta -= Math.PI * 2;
-    const p = solve(theta);
-    if (p) {
-        document.getElementById('h-crank').setAttribute('x2', p.Bx);
-        document.getElementById('h-crank').setAttribute('y2', p.By);
-        document.getElementById('h-coupler').setAttribute('x1', p.Bx);
-        document.getElementById('h-coupler').setAttribute('y1', p.By);
-        document.getElementById('h-coupler').setAttribute('x2', p.Cx);
-        document.getElementById('h-coupler').setAttribute('y2', p.Cy);
-        document.getElementById('h-rocker').setAttribute('x2', p.Cx);
-        document.getElementById('h-rocker').setAttribute('y2', p.Cy);
-        document.getElementById('h-jB').setAttribute('cx', p.Bx);
-        document.getElementById('h-jB').setAttribute('cy', p.By);
-        document.getElementById('h-jC').setAttribute('cx', p.Cx);
-        document.getElementById('h-jC').setAttribute('cy', p.Cy);
-    }
-    requestAnimationFrame(animate);
+// ============ SVG helpers ============
+const NS = 'http://www.w3.org/2000/svg';
+function mkEl(parent, tag, attrs) {
+    const el = document.createElementNS(NS, tag);
+    for (const [k,v] of Object.entries(attrs||{})) el.setAttribute(k,v);
+    parent.appendChild(el);
+    return el;
 }
-animate();
+function setL(el, x1, y1, x2, y2) {
+    el.setAttribute('x1',x1); el.setAttribute('y1',y1);
+    el.setAttribute('x2',x2); el.setAttribute('y2',y2);
+}
+function setC(el, cx, cy) { el.setAttribute('cx',cx); el.setAttribute('cy',cy); }
+
+// ============ Mechanism view ============
+const views = {};
+function createView(svgId, opts) {
+    const svg = document.getElementById(svgId);
+    if (!svg) return null;
+    const o = Object.assign({
+        a:55, b:150, c:100, d:140, Ax:100, Ay:195,
+        showLabels:false, showTrace:false, showGround:true,
+        interactive:false, showAngle:false, crankColor:'#1a1a1a',
+        couplerColor:'#1a1a1a', rockerColor:'#1a1a1a'
+    }, opts);
+    const Dx = o.Ax + o.d, Dy = o.Ay;
+    const els = {};
+
+    // Ground hatching
+    if (o.showGround) {
+        const gy = o.Ay;
+        mkEl(svg,'line',{x1:o.Ax-25,y1:gy,x2:Dx+25,y2:gy,stroke:'#bbb','stroke-width':1});
+        for (let px of [o.Ax, Dx]) {
+            for (let i=-2;i<=2;i++) {
+                mkEl(svg,'line',{x1:px+i*7,y1:gy,x2:px+i*7-5,y2:gy+9,stroke:'#bbb','stroke-width':1});
+            }
+        }
+    }
+
+    // Frame link (dashed)
+    els.frame = mkEl(svg,'line',{x1:o.Ax,y1:o.Ay,x2:Dx,y2:Dy,stroke:'#ccc','stroke-width':1.5,'stroke-dasharray':'6,4'});
+
+    // Trace path
+    els.trace = mkEl(svg,'path',{fill:'none',stroke:'#0C8CE9','stroke-width':1.5,opacity:.6,d:''});
+
+    // Ghost elements (for extreme positions etc)
+    els.ghostGroup = mkEl(svg,'g',{opacity:'0.18'});
+    els.ghost1Crank = mkEl(els.ghostGroup,'line',{stroke:'#1a1a1a','stroke-width':2.5});
+    els.ghost1Coupler = mkEl(els.ghostGroup,'line',{stroke:'#1a1a1a','stroke-width':2.5});
+    els.ghost1Rocker = mkEl(els.ghostGroup,'line',{stroke:'#1a1a1a','stroke-width':2.5});
+    els.ghost2Crank = mkEl(els.ghostGroup,'line',{stroke:'#1a1a1a','stroke-width':2.5});
+    els.ghost2Coupler = mkEl(els.ghostGroup,'line',{stroke:'#1a1a1a','stroke-width':2.5});
+    els.ghost2Rocker = mkEl(els.ghostGroup,'line',{stroke:'#1a1a1a','stroke-width':2.5});
+    els.ghostGroup.style.display = 'none';
+
+    // Angle arc group
+    els.angleGroup = mkEl(svg,'g',{});
+    els.angleArc = mkEl(els.angleGroup,'path',{fill:'rgba(12,140,233,0.12)',stroke:'#0C8CE9','stroke-width':1.5,d:''});
+    els.angleTxt = mkEl(els.angleGroup,'text',{'font-size':13,'font-weight':600,fill:'#0C8CE9','text-anchor':'middle',dy:'.35em'});
+    if (!o.showAngle) els.angleGroup.style.display = 'none';
+
+    // Extreme arcs group
+    els.extremeGroup = mkEl(svg,'g',{});
+    els.extremeGroup.style.display = 'none';
+    els.workArc = mkEl(els.extremeGroup,'path',{fill:'none',stroke:'#0C8CE9','stroke-width':2.5,'stroke-dasharray':'6,3',opacity:.6});
+    els.returnArc = mkEl(els.extremeGroup,'path',{fill:'none',stroke:'#d93025','stroke-width':2.5,'stroke-dasharray':'6,3',opacity:.6});
+    els.thetaArc = mkEl(els.extremeGroup,'path',{fill:'rgba(233,60,12,0.1)',stroke:'#d93025','stroke-width':1.5});
+    els.thetaTxt = mkEl(els.extremeGroup,'text',{'font-size':12,'font-weight':600,fill:'#d93025','text-anchor':'middle',dy:'.35em'});
+
+    // Links
+    els.crank = mkEl(svg,'line',{stroke:o.crankColor,'stroke-width':3,'stroke-linecap':'round'});
+    els.coupler = mkEl(svg,'line',{stroke:o.couplerColor,'stroke-width':3,'stroke-linecap':'round'});
+    els.rocker = mkEl(svg,'line',{stroke:o.rockerColor,'stroke-width':3,'stroke-linecap':'round'});
+
+    // Joints
+    els.jA = mkEl(svg,'circle',{cx:o.Ax,cy:o.Ay,r:5,fill:'#1a1a1a',stroke:'#fff','stroke-width':1.5});
+    els.jD = mkEl(svg,'circle',{cx:Dx,cy:Dy,r:5,fill:'#1a1a1a',stroke:'#fff','stroke-width':1.5});
+    els.jB = mkEl(svg,'circle',{cx:0,cy:0,r:5,fill:'#fff',stroke:'#1a1a1a','stroke-width':2});
+    els.jC = mkEl(svg,'circle',{cx:0,cy:0,r:5,fill:'#fff',stroke:'#1a1a1a','stroke-width':2});
+
+    // Labels
+    if (o.showLabels) {
+        els.lA = mkEl(svg,'text',{x:o.Ax,y:o.Ay+22,'font-size':13,'text-anchor':'middle',fill:'#999',dy:'.35em'});
+        els.lA.textContent = 'A';
+        els.lD = mkEl(svg,'text',{x:Dx,y:Dy+22,'font-size':13,'text-anchor':'middle',fill:'#999',dy:'.35em'});
+        els.lD.textContent = 'D';
+        els.lB = mkEl(svg,'text',{'font-size':13,fill:'#0C8CE9','font-weight':600,dy:'.35em'});
+        els.lB.textContent = 'B';
+        els.lC = mkEl(svg,'text',{'font-size':13,fill:'#1e8e3e','font-weight':600,dy:'.35em'});
+        els.lC.textContent = 'C';
+        // Link labels
+        els.lCrank = mkEl(svg,'text',{'font-size':11,fill:'#0C8CE9','text-anchor':'middle',dy:'.35em'});
+        els.lCrank.textContent = '曲柄 a';
+        els.lCoupler = mkEl(svg,'text',{'font-size':11,fill:'#666','text-anchor':'middle',dy:'.35em'});
+        els.lCoupler.textContent = '连杆 b';
+        els.lRocker = mkEl(svg,'text',{'font-size':11,fill:'#1e8e3e','text-anchor':'middle',dy:'.35em'});
+        els.lRocker.textContent = '摇杆 c';
+        els.lFrame = mkEl(svg,'text',{x:(o.Ax+Dx)/2, y:o.Ay+18,'font-size':11,fill:'#999','text-anchor':'middle',dy:'.35em'});
+        els.lFrame.textContent = '机架 d';
+    }
+
+    // Interactive drag handle
+    if (o.interactive) {
+        els.dragHandle = mkEl(svg,'circle',{cx:0,cy:0,r:20,fill:'rgba(12,140,233,0.15)',stroke:'#0C8CE9','stroke-width':2,cursor:'grab'});
+        // Override joint B appearance
+        els.jB.setAttribute('r', 6);
+        els.jB.setAttribute('fill', '#0C8CE9');
+        els.jB.setAttribute('stroke', '#fff');
+    }
+
+    const state = { theta:0, animId:null, tracePoints:[], dragging:false, showTrace:o.showTrace, playing:false, speed:0.015 };
+
+    function update(theta) {
+        state.theta = theta;
+        const p = solveFB(theta, o.a, o.b, o.c, o.d, o.Ax, o.Ay);
+        if (!p) return null;
+
+        setL(els.crank, o.Ax, o.Ay, p.Bx, p.By);
+        setL(els.coupler, p.Bx, p.By, p.Cx, p.Cy);
+        setL(els.rocker, Dx, Dy, p.Cx, p.Cy);
+        setC(els.jB, p.Bx, p.By);
+        setC(els.jC, p.Cx, p.Cy);
+
+        if (els.dragHandle) { setC(els.dragHandle, p.Bx, p.By); }
+
+        if (o.showLabels) {
+            const offB = theta > Math.PI ? 14 : -14;
+            els.lB.setAttribute('x', p.Bx - 14);
+            els.lB.setAttribute('y', p.By + (Math.sin(theta)>0 ? 14 : -10));
+            els.lC.setAttribute('x', p.Cx + 10);
+            els.lC.setAttribute('y', p.Cy - 8);
+            // Link midpoints
+            els.lCrank.setAttribute('x', (o.Ax+p.Bx)/2 - 10);
+            els.lCrank.setAttribute('y', (o.Ay+p.By)/2 + (Math.sin(theta)>0?14:-14));
+            els.lCoupler.setAttribute('x', (p.Bx+p.Cx)/2);
+            els.lCoupler.setAttribute('y', (p.By+p.Cy)/2 - 10);
+            els.lRocker.setAttribute('x', (Dx+p.Cx)/2 + 14);
+            els.lRocker.setAttribute('y', (Dy+p.Cy)/2);
+        }
+
+        if (state.showTrace) {
+            state.tracePoints.push({x:p.Cx, y:p.Cy});
+            if (state.tracePoints.length > 500) state.tracePoints = state.tracePoints.slice(-500);
+            els.trace.setAttribute('d', state.tracePoints.map((pt,i)=>(i?'L':'M')+pt.x.toFixed(1)+','+pt.y.toFixed(1)).join(''));
+        }
+
+        // Transmission angle arc
+        if (o.showAngle) {
+            drawAngleArc(els, p, o);
+        }
+
+        return p;
+    }
+
+    function drawAngleArc(els, p, o) {
+        const r = 28;
+        // Angle at C between CB and CD
+        const aCB = Math.atan2(p.By-p.Cy, p.Bx-p.Cx);
+        const aCD = Math.atan2(Dy-p.Cy, Dx-p.Cx);
+        let start = aCD, end = aCB;
+        // Ensure we draw the acute angle
+        let diff = end - start;
+        while (diff < -Math.PI) diff += 2*Math.PI;
+        while (diff > Math.PI) diff -= 2*Math.PI;
+        if (Math.abs(diff) > Math.PI/2) {
+            // Draw supplement
+            if (diff > 0) { start = aCB; end = aCD + Math.PI; }
+            else { start = aCD + Math.PI; end = aCB; }
+            diff = end - start;
+            while (diff < -Math.PI) diff += 2*Math.PI;
+            while (diff > Math.PI) diff -= 2*Math.PI;
+        }
+        const sx = p.Cx + r*Math.cos(start), sy = p.Cy + r*Math.sin(start);
+        const ex = p.Cx + r*Math.cos(end), ey = p.Cy + r*Math.sin(end);
+        const large = Math.abs(diff) > Math.PI ? 1 : 0;
+        const sweep = diff > 0 ? 1 : 0;
+        els.angleArc.setAttribute('d',
+            `M${p.Cx},${p.Cy}L${sx},${sy}A${r},${r} 0 ${large},${sweep} ${ex},${ey}Z`);
+        const mid = start + diff/2;
+        els.angleTxt.setAttribute('x', p.Cx + (r+16)*Math.cos(mid));
+        els.angleTxt.setAttribute('y', p.Cy + (r+16)*Math.sin(mid));
+        els.angleTxt.textContent = (p.mu*180/Math.PI).toFixed(1)+'°';
+    }
+
+    function startAnim() {
+        state.playing = true;
+        function frame() {
+            state.theta += state.speed;
+            if (state.theta > Math.PI*2) state.theta -= Math.PI*2;
+            update(state.theta);
+            // Sync slider if exists
+            const sl = document.getElementById('slider'+svgId.replace('svg',''));
+            if (sl && !state.dragging) {
+                sl.value = (state.theta * 180 / Math.PI).toFixed(0);
+                const vl = document.getElementById('sliderVal'+svgId.replace('svg',''));
+                if (vl) vl.textContent = sl.value + '°';
+            }
+            state.animId = requestAnimationFrame(frame);
+        }
+        state.animId = requestAnimationFrame(frame);
+    }
+
+    function stopAnim() {
+        state.playing = false;
+        if (state.animId) { cancelAnimationFrame(state.animId); state.animId = null; }
+    }
+
+    // Drag interaction
+    if (o.interactive) {
+        function getAngle(e) {
+            const r = svg.getBoundingClientRect();
+            const vb = svg.viewBox.baseVal;
+            const sx = (e.clientX - r.left) / r.width * vb.width + vb.x;
+            const sy = (e.clientY - r.top) / r.height * vb.height + vb.y;
+            return Math.atan2(sy - o.Ay, sx - o.Ax);
+        }
+        els.dragHandle.addEventListener('pointerdown', e => {
+            state.dragging = true;
+            stopAnim();
+            els.dragHandle.setPointerCapture(e.pointerId);
+            els.dragHandle.style.cursor = 'grabbing';
+            e.preventDefault();
+        });
+        svg.addEventListener('pointermove', e => {
+            if (!state.dragging) return;
+            const th = getAngle(e);
+            update(th);
+            // Update info
+            const p = solveFB(th, o.a, o.b, o.c, o.d, o.Ax, o.Ay);
+            if (p && o.onUpdate) o.onUpdate(th, p);
+        });
+        const endDrag = () => { state.dragging = false; els.dragHandle.style.cursor = 'grab'; };
+        svg.addEventListener('pointerup', endDrag);
+        svg.addEventListener('pointercancel', endDrag);
+    }
+
+    const v = { update, startAnim, stopAnim, state, els, o, svg, Dx, Dy };
+    views[svgId] = v;
+    update(0);
+    return v;
+}
+
+// ============ Card Navigation ============
+const TOTAL_CARDS = 12;
+let currentCard = 0;
+const dots = document.getElementById('dots');
+for (let i = 0; i < TOTAL_CARDS; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i===0?' active':'');
+    dots.appendChild(d);
+}
+
+function go(dir) {
+    const next = currentCard + dir;
+    if (next < 0 || next >= TOTAL_CARDS) return;
+    const curEl = document.getElementById('card-'+currentCard);
+    const nxtEl = document.getElementById('card-'+next);
+    // Deactivate current card animations
+    deactivateCard(currentCard);
+    if (dir > 0) {
+        curEl.className = 'card pos-left';
+        nxtEl.className = 'card pos-center';
+    } else {
+        curEl.className = 'card pos-right';
+        nxtEl.className = 'card pos-center';
+    }
+    currentCard = next;
+    activateCard(currentCard);
+    // Update dots
+    document.querySelectorAll('.dot').forEach((d,i) => d.className = 'dot'+(i===currentCard?' active':''));
+    // Update buttons
+    document.getElementById('prevBtn').disabled = currentCard === 0;
+    document.getElementById('nextBtn').disabled = currentCard === TOTAL_CARDS - 1;
+}
+
+// Card-specific activation/deactivation
+// Map card index to svgId for cards with non-numeric IDs
+const cardSvgMap = {5:'svg5cr', 6:'svg6dc', 7:'svg7dr'};
+const card4MiniSvgIds = ['svg4mini-cr', 'svg4mini-dc', 'svg4mini-dr'];
+let card4MiniPlaying = true;
+let card4MiniTraceOn = false;
+function getSvgId(idx) { return cardSvgMap[idx] || ('svg'+idx); }
+
+function activateCard(idx) {
+    const svgId = getSvgId(idx);
+    const v = views[svgId];
+    if (!v) return;
+    // Auto-play animation cards
+    if ([0, 2, 5, 6, 7, 8, 10].includes(idx)) {
+        v.startAnim();
+        const btns = document.querySelectorAll('#card-'+idx+' .ctrl-btn');
+        btns.forEach(b => { if(b.textContent.includes('播放')||b.textContent.includes('暂停')) { b.textContent='⏸ 暂停'; b.classList.add('active'); }});
+    }
+    if (idx === 4 && card4MiniPlaying) {
+        setCard4MiniPlayback(true);
+    }
+    if (idx === 11 && v.state.playing) v.startAnim();
+}
+
+function deactivateCard(idx) {
+    const svgId = getSvgId(idx);
+    const v = views[svgId];
+    if (v) v.stopAnim();
+    if (idx === 4) {
+        setCard4MiniPlayback(false);
+    }
+}
+
+// ============ Slider controls ============
+function setupSlider(sliderId, svgId) {
+    const slider = document.getElementById(sliderId);
+    if (!slider) return;
+    slider.addEventListener('input', function() {
+        const v = views[svgId];
+        if (!v) return;
+        v.stopAnim();
+        const theta = parseFloat(this.value) * Math.PI / 180;
+        v.update(theta);
+        const vl = document.getElementById(sliderId.replace('slider','sliderVal'));
+        if (vl) vl.textContent = this.value + '°';
+        // Update buttons
+        const btns = document.querySelectorAll('#card-'+svgId.replace('svg','')+' .ctrl-btn');
+        btns.forEach(b => { if(b.textContent.includes('暂停')) { b.textContent='▶ 播放'; b.classList.remove('active'); }});
+    });
+}
+
+// ============ Control functions ============
+function toggleAnim(cardIdx) {
+    const svgId = typeof cardIdx === 'string' ? 'svg'+cardIdx : getSvgId(cardIdx);
+    const cardId = typeof cardIdx === 'string' ? cardIdx : cardIdx;
+    const v = views[svgId];
+    if (!v) return;
+    if (v.state.playing) {
+        v.stopAnim();
+        const btns = document.querySelectorAll('[id^="card-"] .ctrl-btn');
+        // Find the right card's buttons
+        const card = v.svg.closest('.card');
+        if (card) card.querySelectorAll('.ctrl-btn').forEach(b => { if(b.textContent.includes('暂停')) { b.textContent='▶ 播放'; b.classList.remove('active'); }});
+    } else {
+        v.startAnim();
+        const card = v.svg.closest('.card');
+        if (card) card.querySelectorAll('.ctrl-btn').forEach(b => { if(b.textContent.includes('播放')) { b.textContent='⏸ 暂停'; b.classList.add('active'); }});
+    }
+}
+
+function toggleTrace(cardIdx) {
+    const svgId = typeof cardIdx === 'string' ? 'svg'+cardIdx : getSvgId(cardIdx);
+    const v = views[svgId];
+    if (!v) return;
+    v.state.showTrace = !v.state.showTrace;
+    if (!v.state.showTrace) { v.els.trace.setAttribute('d',''); v.state.tracePoints=[]; }
+    const card = v.svg.closest('.card');
+    if (card) card.querySelectorAll('.ctrl-btn').forEach(b => { if(b.textContent.includes('轨迹')) b.classList.toggle('active'); });
+}
+
+function resetTrace(cardIdx) {
+    const svgId = typeof cardIdx === 'string' ? 'svg'+cardIdx : getSvgId(cardIdx);
+    const v = views[svgId];
+    if (!v) return;
+    v.state.tracePoints = [];
+    v.els.trace.setAttribute('d','');
+}
+
+function configureOscillatingView(v, scanStep = 0.005) {
+    if (!v) return;
+    let minT = null, maxT = null;
+    for (let t = 0; t < Math.PI*2; t += scanStep) {
+        const p = solveFB(t, v.o.a, v.o.b, v.o.c, v.o.d, v.o.Ax, v.o.Ay);
+        if (!p) continue;
+        if (minT === null) minT = t;
+        maxT = t;
+    }
+    if (minT === null || maxT === null) return;
+    minT += 0.02;
+    maxT -= 0.02;
+    if (minT >= maxT) {
+        minT = Math.max(0, minT - 0.03);
+        maxT = Math.min(Math.PI * 2, minT + 0.06);
+    }
+    v.state.theta = (minT + maxT) / 2;
+    v.state._oscillateMin = minT;
+    v.state._oscillateMax = maxT;
+    v.state._oscillateDir = 1;
+    v.update(v.state.theta);
+
+    v.startAnim = function() {
+        v.state.playing = true;
+        if (v.state.animId) cancelAnimationFrame(v.state.animId);
+        function frame() {
+            v.state.theta += v.state.speed * v.state._oscillateDir;
+            if (v.state.theta >= v.state._oscillateMax) {
+                v.state.theta = v.state._oscillateMax;
+                v.state._oscillateDir = -1;
+            } else if (v.state.theta <= v.state._oscillateMin) {
+                v.state.theta = v.state._oscillateMin;
+                v.state._oscillateDir = 1;
+            }
+            v.update(v.state.theta);
+            v.state.animId = requestAnimationFrame(frame);
+        }
+        v.state.animId = requestAnimationFrame(frame);
+    };
+}
+
+function setCard4MiniPlayback(playing) {
+    card4MiniSvgIds.forEach(svgId => {
+        const v = views[svgId];
+        if (!v) return;
+        if (playing) v.startAnim();
+        else v.stopAnim();
+    });
+}
+
+function toggleCard4MiniAnim(btn) {
+    card4MiniPlaying = !card4MiniPlaying;
+    if (currentCard === 4 && card4MiniPlaying) setCard4MiniPlayback(true);
+    else setCard4MiniPlayback(false);
+    if (!btn) return;
+    btn.textContent = card4MiniPlaying ? '⏸ 同步动画' : '▶ 同步动画';
+    btn.classList.toggle('active', card4MiniPlaying);
+}
+
+function toggleCard4MiniTrace(btn) {
+    card4MiniTraceOn = !card4MiniTraceOn;
+    card4MiniSvgIds.forEach(svgId => {
+        const v = views[svgId];
+        if (!v) return;
+        v.state.showTrace = card4MiniTraceOn;
+        if (!card4MiniTraceOn) {
+            v.state.tracePoints = [];
+            v.els.trace.setAttribute('d', '');
+        }
+    });
+    if (!btn) return;
+    btn.classList.toggle('active', card4MiniTraceOn);
+    btn.textContent = card4MiniTraceOn ? '隐藏轨迹' : '显示轨迹';
+}
+
+function resetCard4MiniTrace() {
+    card4MiniSvgIds.forEach(svgId => {
+        const v = views[svgId];
+        if (!v) return;
+        v.state.tracePoints = [];
+        v.els.trace.setAttribute('d', '');
+    });
+}
+
+function initCard4MiniVisuals() {
+    createView('svg4mini-cr', {
+        showGround:true, showTrace:false,
+        a:35, b:92, c:62, d:86, Ax:44, Ay:126,
+        crankColor:'#0C8CE9', couplerColor:'#666', rockerColor:'#1e8e3e'
+    });
+    const vCr = views['svg4mini-cr'];
+    if (vCr) {
+        vCr.state.speed = 0.02;
+        vCr.els.crank.classList.add('shortest-bar-pulse');
+        vCr.els.trace.setAttribute('stroke', '#0C8CE9');
+    }
+
+    createView('svg4mini-dc', {
+        showGround:true, showTrace:false,
+        a:58, b:92, c:70, d:36, Ax:106, Ay:126,
+        crankColor:'#0C8CE9', couplerColor:'#666', rockerColor:'#1e8e3e'
+    });
+    const vDc = views['svg4mini-dc'];
+    if (vDc) {
+        vDc.state.speed = 0.02;
+        vDc.els.frame.setAttribute('stroke', '#1e8e3e');
+        vDc.els.frame.setAttribute('stroke-dasharray', 'none');
+        vDc.els.frame.setAttribute('stroke-width', '3');
+        vDc.els.frame.classList.add('shortest-bar-pulse');
+        vDc.els.trace.setAttribute('stroke', '#1e8e3e');
+    }
+
+    createView('svg4mini-dr', {
+        showGround:true, showTrace:false,
+        a:62, b:32, c:68, d:86, Ax:44, Ay:126,
+        crankColor:'#0C8CE9', couplerColor:'#e65100', rockerColor:'#1e8e3e'
+    });
+    const vDr = views['svg4mini-dr'];
+    if (vDr) {
+        vDr.state.speed = 0.02;
+        vDr.els.coupler.classList.add('shortest-bar-pulse');
+        vDr.els.trace.setAttribute('stroke', '#e65100');
+        configureOscillatingView(vDr, 0.01);
+    }
+
+    drawCard4PositionMap();
+    setCard4MiniPlayback(false);
+}
+
+function drawCard4PositionMap() {
+    const svg = document.getElementById('svg4posmap');
+    if (!svg) return;
+    svg.innerHTML = '';
+
+    const schemes = [
+        { cx:65, title:'① 连架杆最短', result:'曲柄摇杆', shortest:'a', color:'#0C8CE9' },
+        { cx:190, title:'② 机架最短', result:'双曲柄', shortest:'d', color:'#1e8e3e' },
+        { cx:315, title:'③ 连杆最短', result:'双摇杆', shortest:'b', color:'#e65100' }
+    ];
+
+    schemes.forEach(s => {
+        mkEl(svg, 'rect', {
+            x:s.cx-58, y:8, width:116, height:112, rx:10,
+            fill:'#f8fafc', stroke:'#e2e8f0', 'stroke-width':1
+        });
+
+        const A = {x:s.cx-32, y:88};
+        const B = {x:s.cx-18, y:52};
+        const C = {x:s.cx+18, y:52};
+        const D = {x:s.cx+32, y:88};
+
+        const base = '#9aa4b2';
+        const colorA = s.shortest === 'a' ? s.color : base;
+        const colorB = s.shortest === 'b' ? s.color : base;
+        const colorC = s.shortest === 'c' ? s.color : base;
+        const colorD = s.shortest === 'd' ? s.color : base;
+        const sw = k => (s.shortest === k ? 4 : 2);
+
+        mkEl(svg, 'line', {x1:A.x,y1:A.y,x2:B.x,y2:B.y,stroke:colorA,'stroke-width':sw('a'),'stroke-linecap':'round'});
+        mkEl(svg, 'line', {x1:B.x,y1:B.y,x2:C.x,y2:C.y,stroke:colorB,'stroke-width':sw('b'),'stroke-linecap':'round'});
+        mkEl(svg, 'line', {x1:D.x,y1:D.y,x2:C.x,y2:C.y,stroke:colorC,'stroke-width':sw('c'),'stroke-linecap':'round'});
+        mkEl(svg, 'line', {
+            x1:A.x, y1:A.y, x2:D.x, y2:D.y,
+            stroke:colorD, 'stroke-width':sw('d'),
+            'stroke-dasharray':s.shortest === 'd' ? '' : '4,3',
+            'stroke-linecap':'round'
+        });
+
+        [A, B, C, D].forEach(p => mkEl(svg, 'circle', {cx:p.x, cy:p.y, r:3.2, fill:'#fff', stroke:'#334155', 'stroke-width':1.2}));
+
+        const mids = {
+            a:{x:(A.x+B.x)/2, y:(A.y+B.y)/2},
+            b:{x:(B.x+C.x)/2, y:(B.y+C.y)/2},
+            c:{x:(D.x+C.x)/2, y:(D.y+C.y)/2},
+            d:{x:(A.x+D.x)/2, y:(A.y+D.y)/2}
+        };
+        const star = mids[s.shortest];
+        const st = mkEl(svg, 'text', {x:star.x, y:star.y-8, 'font-size':10, fill:s.color, 'font-weight':700, 'text-anchor':'middle'});
+        st.textContent = '★';
+
+        const t1 = mkEl(svg, 'text', {x:s.cx, y:24, 'font-size':11, 'font-weight':700, fill:s.color, 'text-anchor':'middle'});
+        t1.textContent = s.title;
+        const t2 = mkEl(svg, 'text', {x:s.cx, y:112, 'font-size':10, 'font-weight':600, fill:'#475569', 'text-anchor':'middle'});
+        t2.textContent = '→ ' + s.result;
+    });
+}
+
+// ============ Extreme positions ============
+function normalizeAngle(theta) {
+    const twoPi = Math.PI * 2;
+    let t = theta % twoPi;
+    if (t < 0) t += twoPi;
+    return t;
+}
+
+function cwDelta(startTheta, endTheta) {
+    let d = normalizeAngle(endTheta) - normalizeAngle(startTheta);
+    if (d < 0) d += Math.PI * 2;
+    return d;
+}
+
+function getExtremeThetas(a, b, c, d, Ax, Ay) {
+    // Pick a theta candidate by solving then enforcing AB // BC.
+    // wantOverlap=true means AB and BC opposite direction (dot < 0).
+    function pickCollinearTheta(candidates, wantOverlap) {
+        const ab = Math.max(1e-6, a * b);
+        let bestMatch = null;
+        let bestAny = null;
+
+        for (const rawTheta of candidates) {
+            const theta = normalizeAngle(rawTheta);
+            const p = solveFB(theta, a, b, c, d, Ax, Ay);
+            if (!p) continue;
+
+            const ABx = p.Bx - Ax, ABy = p.By - Ay;
+            const BCx = p.Cx - p.Bx, BCy = p.Cy - p.By;
+            const cross = ABx * BCy - ABy * BCx;
+            const dot = ABx * BCx + ABy * BCy;
+            const score = Math.abs(cross) / ab;
+            const overlapOk = wantOverlap ? (dot < 0) : (dot > 0);
+
+            if (!bestAny || score < bestAny.score) bestAny = { theta, score };
+            if (overlapOk && (!bestMatch || score < bestMatch.score)) {
+                bestMatch = { theta, score };
+            }
+        }
+
+        if (bestMatch) return bestMatch.theta;
+        return bestAny ? bestAny.theta : null;
+    }
+
+    // Extended collinear: AC = a + b
+    const AC1 = a + b;
+    const cosA1 = (AC1 * AC1 + d * d - c * c) / (2 * AC1 * d);
+    const angA1 = Math.acos(Math.max(-1, Math.min(1, cosA1)));
+    const theta1Fallback = -angA1;
+    let theta1 = pickCollinearTheta([-angA1, angA1], false);
+    if (theta1 === null) theta1 = theta1Fallback;
+
+    // Overlap collinear: AC = |b - a|
+    const AC2 = Math.abs(b - a);
+    let theta2 = null;
+    if (AC2 >= 1e-6) {
+        const cosA2 = (AC2 * AC2 + d * d - c * c) / (2 * AC2 * d);
+        if (Math.abs(cosA2) <= 1) {
+            const angA2 = Math.acos(Math.max(-1, Math.min(1, cosA2)));
+            theta2 = pickCollinearTheta([Math.PI - angA2, Math.PI + angA2], true);
+            if (theta2 === null) theta2 = Math.PI - angA2;
+        }
+    }
+
+    if (theta2 === null) theta2 = theta1 + Math.PI;
+    return { theta1, theta2 };
+}
+
+function showExtreme(which) {
+    const v = views['svg8'];
+    if (!v) return;
+    v.stopAnim();
+    const btns = document.querySelectorAll('#card-8 .ctrl-btn');
+    btns.forEach(b => { if(b.textContent.includes('暂停')) { b.textContent='▶ 播放'; b.classList.remove('active'); }});
+
+    const ext = getExtremeThetas(v.o.a, v.o.b, v.o.c, v.o.d, v.o.Ax, v.o.Ay);
+    const theta = which === 1 ? ext.theta1 : ext.theta2;
+    v.update(theta);
+}
+
+function drawExtremePositions(v) {
+    const ext = getExtremeThetas(v.o.a, v.o.b, v.o.c, v.o.d, v.o.Ax, v.o.Ay);
+    const p1 = solveFB(ext.theta1, v.o.a, v.o.b, v.o.c, v.o.d, v.o.Ax, v.o.Ay);
+    const p2 = solveFB(ext.theta2, v.o.a, v.o.b, v.o.c, v.o.d, v.o.Ax, v.o.Ay);
+    if (!p1 || !p2) return;
+
+    v.els.ghostGroup.style.display = '';
+    setL(v.els.ghost1Crank, v.o.Ax, v.o.Ay, p1.Bx, p1.By);
+    setL(v.els.ghost1Coupler, p1.Bx, p1.By, p1.Cx, p1.Cy);
+    setL(v.els.ghost1Rocker, v.Dx, v.Dy, p1.Cx, p1.Cy);
+    setL(v.els.ghost2Crank, v.o.Ax, v.o.Ay, p2.Bx, p2.By);
+    setL(v.els.ghost2Coupler, p2.Bx, p2.By, p2.Cx, p2.Cy);
+    setL(v.els.ghost2Rocker, v.Dx, v.Dy, p2.Cx, p2.Cy);
+
+    // Rocker swing arc
+    v.els.extremeGroup.style.display = '';
+    const r1 = Math.atan2(p1.Cy-v.Dy, p1.Cx-v.Dx);
+    const r2 = Math.atan2(p2.Cy-v.Dy, p2.Cx-v.Dx);
+    const arcR = v.o.c;
+    // Draw rocker sweep arc (not needed for now, just show theta)
+
+    // Extreme position angle theta at A
+    const arc12 = cwDelta(ext.theta1, ext.theta2);
+    const arc21 = cwDelta(ext.theta2, ext.theta1);
+    const use12AsWork = arc12 >= arc21;
+    const workStart = use12AsWork ? ext.theta1 : ext.theta2;
+    const workEnd = use12AsWork ? ext.theta2 : ext.theta1;
+    const returnStart = use12AsWork ? ext.theta2 : ext.theta1;
+    const returnEnd = use12AsWork ? ext.theta1 : ext.theta2;
+    const workAngle = use12AsWork ? arc12 : arc21;
+    const returnAngle = use12AsWork ? arc21 : arc12;
+    const extremeAngle = Math.abs(workAngle - returnAngle) / 2;
+
+    // Draw work stroke arc (blue, larger crank angle) and return stroke arc (red, smaller crank angle)
+    const aR = 35;
+    function arcPathCW(cx, cy, r, startAng, endAng) {
+        const s = normalizeAngle(startAng);
+        const diff = cwDelta(startAng, endAng);
+        const e = s + diff;
+        const sx = cx + r * Math.cos(s), sy = cy + r * Math.sin(s);
+        const ex = cx + r * Math.cos(e), ey = cy + r * Math.sin(e);
+        const large = diff > Math.PI ? 1 : 0;
+        return `M${sx},${sy}A${r},${r} 0 ${large},1 ${ex},${ey}`;
+    }
+
+    v.els.workArc.setAttribute('d', arcPathCW(v.o.Ax, v.o.Ay, aR, workStart, workEnd));
+    v.els.returnArc.setAttribute('d', arcPathCW(v.o.Ax, v.o.Ay, aR + 6, returnStart, returnEnd));
+
+    // Theta angle label
+    const K = (Math.PI + extremeAngle) / (Math.PI - extremeAngle);
+    v.els.thetaTxt.setAttribute('x', v.o.Ax - 50);
+    v.els.thetaTxt.setAttribute('y', v.o.Ay - 45);
+    v.els.thetaTxt.textContent = 'θ≈' + (extremeAngle*180/Math.PI).toFixed(1) + '°';
+}
+
+// ============ Dead points ============
+// Dead points for crank-rocker: when rocker drives, dead points occur
+// at the extreme positions (crank & coupler collinear).
+// These are the same thetas as the extreme positions.
+function getDeadThetas(a, b, c, d, Ax, Ay) {
+    const ext = getExtremeThetas(a, b, c, d, Ax, Ay);
+    return [ext.theta1, ext.theta2];
+}
+
+function showDead(which) {
+    const v = views['svg10'];
+    if (!v) return;
+    v.stopAnim();
+    const btns = document.querySelectorAll('#card-10 .ctrl-btn');
+    btns.forEach(b => { if(b.textContent.includes('暂停')) { b.textContent='▶ 播放'; b.classList.remove('active'); }});
+
+    const deads = getDeadThetas(v.o.a, v.o.b, v.o.c, v.o.d, v.o.Ax, v.o.Ay);
+    if (deads.length >= which) {
+        v.update(deads[which-1]);
+    }
+}
+
+// ============ Lab controls ============
+function setupLab() {
+    const params = ['a','b','c','d'];
+    params.forEach(p => {
+        const el = document.getElementById('lab-'+p);
+        if (!el) return;
+        el.addEventListener('input', function() {
+            document.getElementById('lab-'+p+'-v').textContent = this.value;
+            updateLab();
+        });
+    });
+}
+
+function updateLab() {
+    const a = parseInt(document.getElementById('lab-a').value);
+    const b = parseInt(document.getElementById('lab-b').value);
+    const c = parseInt(document.getElementById('lab-c').value);
+    const d = parseInt(document.getElementById('lab-d').value);
+
+    // Check Grashof
+    const lengths = [a,b,c,d].sort((x,y)=>x-y);
+    const s = lengths[0], l = lengths[3], p = lengths[1], q = lengths[2];
+    const grashof = s + l <= p + q;
+
+    document.getElementById('info11-grashof').textContent = grashof ? '✓' : '✗';
+    document.getElementById('info11-grashof').className = 'info-value ' + (grashof ? 'good' : 'bad');
+
+    // Determine type
+    let type = '非Grashof';
+    if (grashof) {
+        if (s === a) type = (s === d) ? '双曲柄/曲摇' : '曲柄摇杆';
+        else if (s === d) type = '双曲柄';
+        else if (s === b) type = '双摇杆';
+        else if (s === c) type = '曲柄摇杆';
+        // More precise: if shortest is crank (a) and adjacent to frame
+        if (a === s && (a !== b)) type = '曲柄摇杆';
+        else if (d === s) type = '双曲柄';
+        else if (b === s) type = '双摇杆';
+        else type = '曲柄摇杆';
+    }
+    document.getElementById('info11-type').textContent = type;
+
+    // Update view
+    const v = views['svg11'];
+    if (!v) return;
+
+    // Recalculate Ax to center the mechanism
+    const Ax = 190 - d/2;
+    v.o.a = a; v.o.b = b; v.o.c = c; v.o.d = d;
+    v.o.Ax = Ax; v.o.Ay = 195;
+    const Dx = Ax + d;
+
+    // Update fixed elements
+    v.els.jA.setAttribute('cx', Ax);
+    v.els.jA.setAttribute('cy', 195);
+    v.els.jD.setAttribute('cx', Dx);
+    v.els.jD.setAttribute('cy', 195);
+    v.els.frame.setAttribute('x1', Ax);
+    v.els.frame.setAttribute('y1', 195);
+    v.els.frame.setAttribute('x2', Dx);
+    v.els.frame.setAttribute('y2', 195);
+
+    // Reset trace
+    v.state.tracePoints = [];
+    v.els.trace.setAttribute('d','');
+
+    // Try to update current position
+    const result = v.update(v.state.theta);
+
+    // Compute mu_min and K
+    if (grashof && type.includes('曲柄')) {
+        let muMin = Math.PI;
+        for (let t = 0; t < Math.PI*2; t += 0.01) {
+            const pp = solveFB(t, a, b, c, d, Ax, 195);
+            if (pp && pp.mu < muMin) muMin = pp.mu;
+        }
+        const muMinDeg = (muMin * 180 / Math.PI).toFixed(1);
+        document.getElementById('info11-mumin').textContent = muMinDeg + '°';
+        document.getElementById('info11-mumin').className = 'info-value ' + (muMin*180/Math.PI >= 40 ? 'good' : muMin*180/Math.PI >= 20 ? 'warn' : 'bad');
+
+        // K
+        const ext = getExtremeThetas(a, b, c, d, Ax, 195);
+        let diff = ext.theta2 - ext.theta1;
+        while (diff < 0) diff += 2*Math.PI;
+        const work = diff, ret = 2*Math.PI - diff;
+        const extremeAng = Math.abs(work - ret) / 2;
+        const K = (Math.PI + extremeAng) / (Math.PI - extremeAng);
+        document.getElementById('info11-k').textContent = K.toFixed(2);
+    } else {
+        document.getElementById('info11-mumin').textContent = '—';
+        document.getElementById('info11-mumin').className = 'info-value';
+        document.getElementById('info11-k').textContent = '—';
+    }
+}
+
+// ============ Compute min transmission angle ============
+function computeMuMin(a, b, c, d, Ax, Ay) {
+    let muMin = Math.PI;
+    for (let t = 0; t < Math.PI*2; t += 0.005) {
+        const p = solveFB(t, a, b, c, d, Ax, Ay);
+        if (p && p.mu < muMin) muMin = p.mu;
+    }
+    return muMin;
+}
+
+// ============ Initialize all cards ============
+function init() {
+    // Card 0: Title hero animation
+    createView('svg0', { showGround:true, showLabels:false });
+
+    // Card 1: Components with labels
+    createView('svg1', { showGround:true, showLabels:true, crankColor:'#0C8CE9', rockerColor:'#1e8e3e' });
+    views['svg1'].update(-0.6);
+
+    // Card 2: Motion demo with trace & slider
+    createView('svg2', { showGround:true, showTrace:false });
+    setupSlider('slider2', 'svg2');
+
+    // Card 3: Interactive drag
+    createView('svg3', {
+        showGround:true, interactive:true, showTrace:true,
+        crankColor:'#0C8CE9',
+        onUpdate: function(th, p) {
+            const deg = (th * 180 / Math.PI);
+            const d = ((deg % 360) + 360) % 360;
+            document.getElementById('info3-theta').textContent = d.toFixed(1) + '°';
+            const rockDeg = (p.rockAng * 180 / Math.PI);
+            document.getElementById('info3-phi').textContent = ((rockDeg%360+360)%360).toFixed(1) + '°';
+            const muDeg = (p.mu * 180 / Math.PI).toFixed(1);
+            const muEl = document.getElementById('info3-mu');
+            muEl.textContent = muDeg + '°';
+            muEl.className = 'info-value ' + (p.mu*180/Math.PI >= 40 ? 'good' : p.mu*180/Math.PI >= 20 ? 'warn' : 'bad');
+        }
+    });
+
+    // Card 4: Grashof overview - static demo with bar length labels
+    createView('svg4', { showGround:true, showLabels:true, Ay:180, crankColor:'#0C8CE9', rockerColor:'#1e8e3e' });
+    views['svg4'].update(-0.5);
+    // Draw shortest bar highlight on svg4
+    drawShortestBarHighlight('svg4');
+    // Synchronized mini visualizations for three mechanism types
+    initCard4MiniVisuals();
+
+    // Card 5: Crank-Rocker demo (shortest = side link a)
+    // a=55(shortest,crank), b=150(coupler), c=100(rocker), d=140(frame)
+    createView('svg5cr', {
+        showGround:true, showLabels:false, showTrace:false,
+        a:55, b:150, c:100, d:140, Ax:100, Ay:210,
+        crankColor:'#0C8CE9', couplerColor:'#666', rockerColor:'#1e8e3e'
+    });
+    drawMechTypeLabels('svg5cr', {type:'crank-rocker', a:55, b:150, c:100, d:140, shortest:'a'});
+
+    // Card 6: Double-Crank demo (shortest = frame d)
+    // a=100, b=150, c=120, d=60(shortest,frame)
+    createView('svg6dc', {
+        showGround:true, showLabels:false, showTrace:false,
+        a:100, b:150, c:120, d:60, Ax:140, Ay:210,
+        crankColor:'#0C8CE9', couplerColor:'#666', rockerColor:'#1e8e3e'
+    });
+    // Highlight frame as shortest bar with orange color
+    views['svg6dc'].els.frame.setAttribute('stroke', '#e65100');
+    views['svg6dc'].els.frame.setAttribute('stroke-dasharray', 'none');
+    views['svg6dc'].els.frame.setAttribute('stroke-width', '3');
+    drawMechTypeLabels('svg6dc', {type:'double-crank', a:100, b:150, c:120, d:60, shortest:'d'});
+
+    // Card 7: Double-Rocker demo (shortest = coupler b)
+    // a=100, b=50(shortest,coupler), c=110, d=140(frame)
+    createView('svg7dr', {
+        showGround:true, showLabels:false, showTrace:false,
+        a:100, b:50, c:110, d:140, Ax:100, Ay:210,
+        crankColor:'#0C8CE9', couplerColor:'#e65100', rockerColor:'#1e8e3e'
+    });
+    drawMechTypeLabels('svg7dr', {type:'double-rocker', a:100, b:50, c:110, d:140, shortest:'b'});
+    // Double-rocker: oscillatory motion instead of full rotation
+    configureOscillatingView(views['svg7dr'], 0.005);
+
+    // Card 8: Extreme positions
+    const v8 = createView('svg8', { showGround:true, Ay:200 });
+    drawExtremePositions(v8);
+
+    // Card 9: Transmission angle
+    createView('svg9', { showGround:true, showAngle:true });
+    setupSlider('slider9', 'svg9');
+    const muMin9 = computeMuMin(55, 150, 100, 140, 100, 195);
+    document.getElementById('info9-mumin').textContent = (muMin9*180/Math.PI).toFixed(1) + '°';
+    const p9init = solveFB(0, 55, 150, 100, 140, 100, 195);
+    if (p9init) {
+        document.getElementById('info9-mu').textContent = (p9init.mu*180/Math.PI).toFixed(1) + '°';
+        document.getElementById('info9-alpha').textContent = (90 - p9init.mu*180/Math.PI).toFixed(1) + '°';
+    }
+    const sl9 = document.getElementById('slider9');
+    function updateCard9Info(th) {
+        const p = solveFB(th, 55, 150, 100, 140, 100, 195);
+        if (p) {
+            const md = (p.mu * 180 / Math.PI).toFixed(1);
+            document.getElementById('info9-mu').textContent = md + '°';
+            document.getElementById('info9-mu').className = 'info-value ' + (p.mu*180/Math.PI >= 40 ? 'good' : p.mu*180/Math.PI >= 20 ? 'warn' : 'bad');
+            document.getElementById('info9-alpha').textContent = (90 - p.mu*180/Math.PI).toFixed(1) + '°';
+        }
+    }
+    sl9.addEventListener('input', function() {
+        updateCard9Info(parseFloat(this.value) * Math.PI / 180);
+    });
+
+    // Card 10: Dead points with ghost positions
+    const v10 = createView('svg10', { showGround:true, showAngle:true });
+    const deadThetas = getDeadThetas(v10.o.a, v10.o.b, v10.o.c, v10.o.d, v10.o.Ax, v10.o.Ay);
+    const dp1 = solveFB(deadThetas[0], v10.o.a, v10.o.b, v10.o.c, v10.o.d, v10.o.Ax, v10.o.Ay);
+    const dp2 = solveFB(deadThetas[1], v10.o.a, v10.o.b, v10.o.c, v10.o.d, v10.o.Ax, v10.o.Ay);
+    if (dp1 && dp2) {
+        v10.els.ghostGroup.style.display = '';
+        setL(v10.els.ghost1Crank, v10.o.Ax, v10.o.Ay, dp1.Bx, dp1.By);
+        setL(v10.els.ghost1Coupler, dp1.Bx, dp1.By, dp1.Cx, dp1.Cy);
+        setL(v10.els.ghost1Rocker, v10.Dx, v10.Dy, dp1.Cx, dp1.Cy);
+        setL(v10.els.ghost2Crank, v10.o.Ax, v10.o.Ay, dp2.Bx, dp2.By);
+        setL(v10.els.ghost2Coupler, dp2.Bx, dp2.By, dp2.Cx, dp2.Cy);
+        setL(v10.els.ghost2Rocker, v10.Dx, v10.Dy, dp2.Cx, dp2.Cy);
+    }
+
+    // Card 11: Lab
+    createView('svg11', { showGround:true, showTrace:false });
+    setupLab();
+    updateLab();
+
+    // Set initial info for card 3
+    const p3init = solveFB(0, 55, 150, 100, 140, 100, 195);
+    if (p3init) {
+        document.getElementById('info3-theta').textContent = '0.0°';
+        document.getElementById('info3-phi').textContent = (((p3init.rockAng*180/Math.PI)%360+360)%360).toFixed(1) + '°';
+        document.getElementById('info3-mu').textContent = (p3init.mu*180/Math.PI).toFixed(1) + '°';
+    }
+
+    // Start card 0 animation
+    activateCard(0);
+}
+
+// ============ Draw mechanism type labels & bar length annotations ============
+function drawShortestBarHighlight(svgId) {
+    const v = views[svgId];
+    if (!v) return;
+    // Pulse the crank (shortest bar) in svg4
+    v.els.crank.classList.add('shortest-bar-pulse');
+}
+
+function drawMechTypeLabels(svgId, cfg) {
+    const v = views[svgId];
+    if (!v) return;
+    const svg = v.svg;
+    const o = v.o;
+    const Dx = o.Ax + o.d, Dy = o.Ay;
+
+    // Draw bar length labels near each link
+    const p = solveFB(v.state.theta, o.a, o.b, o.c, o.d, o.Ax, o.Ay);
+    if (!p) return;
+
+    // Helper: add a label group with background
+    function addBarLabel(x, y, text, color, isShortest) {
+        const g = mkEl(svg, 'g', {});
+        const bg = mkEl(g, 'rect', {
+            x: x-22, y: y-9, width: 44, height: 18, rx: 4,
+            fill: isShortest ? color : '#f5f5f5',
+            opacity: isShortest ? 0.2 : 0.8,
+            stroke: color, 'stroke-width': isShortest ? 1.5 : 0.5
+        });
+        const t = mkEl(g, 'text', {
+            x: x, y: y, 'font-size': 11, 'font-weight': isShortest ? 700 : 500,
+            fill: color, 'text-anchor': 'middle', dy: '.35em'
+        });
+        t.textContent = text;
+        if (isShortest) {
+            // Add "最短" indicator
+            const st = mkEl(g, 'text', {
+                x: x, y: y + 14, 'font-size': 9, 'font-weight': 600,
+                fill: color, 'text-anchor': 'middle', dy: '.35em'
+            });
+            st.textContent = '★ 最短杆';
+        }
+        return g;
+    }
+
+    // Crank midpoint
+    const cmx = (o.Ax + p.Bx)/2, cmy = (o.Ay + p.By)/2;
+    addBarLabel(cmx - 16, cmy - 16, 'a='+o.a, cfg.shortest==='a' ? '#0C8CE9' : '#999', cfg.shortest==='a');
+
+    // Coupler midpoint
+    const copmx = (p.Bx + p.Cx)/2, copmy = (p.By + p.Cy)/2;
+    addBarLabel(copmx, copmy - 16, 'b='+o.b, cfg.shortest==='b' ? '#e65100' : '#999', cfg.shortest==='b');
+
+    // Rocker midpoint
+    const rmx = (Dx + p.Cx)/2, rmy = (Dy + p.Cy)/2;
+    addBarLabel(rmx + 20, rmy, 'c='+o.c, cfg.shortest==='c' ? '#1e8e3e' : '#999', cfg.shortest==='c');
+
+    // Frame midpoint
+    const fmx = (o.Ax + Dx)/2, fmy = o.Ay + 18;
+    addBarLabel(fmx, fmy, 'd='+o.d, cfg.shortest==='d' ? '#e65100' : '#999', cfg.shortest==='d');
+
+    // Highlight the shortest bar with pulse animation
+    if (cfg.shortest === 'a') v.els.crank.classList.add('shortest-bar-pulse');
+    else if (cfg.shortest === 'b') v.els.coupler.classList.add('shortest-bar-pulse');
+    else if (cfg.shortest === 'c') v.els.rocker.classList.add('shortest-bar-pulse');
+    else if (cfg.shortest === 'd') v.els.frame.classList.add('shortest-bar-pulse');
+
+    // Draw rotation indicator arcs for cranks
+    if (cfg.type === 'crank-rocker') {
+        // Full circle arc at A for crank
+        drawRotationArc(svg, o.Ax, o.Ay, 20, '#0C8CE9', true);
+        // Partial arc at D for rocker
+        drawSwingArc(svg, Dx, Dy, 20, '#1e8e3e', o, v);
+    } else if (cfg.type === 'double-crank') {
+        drawRotationArc(svg, o.Ax, o.Ay, 20, '#0C8CE9', true);
+        drawRotationArc(svg, Dx, Dy, 20, '#1e8e3e', true);
+    } else if (cfg.type === 'double-rocker') {
+        drawSwingArc(svg, o.Ax, o.Ay, 20, '#0C8CE9', o, v);
+        drawSwingArc(svg, Dx, Dy, 20, '#1e8e3e', o, v);
+    }
+}
+
+function drawRotationArc(svg, cx, cy, r, color, full) {
+    // Draw a full rotation arrow
+    const arc = mkEl(svg, 'path', {
+        d: `M${cx+r},${cy}A${r},${r} 0 1,1 ${cx+r-0.01},${cy+0.01}`,
+        fill: 'none', stroke: color, 'stroke-width': 1.5, 'stroke-dasharray': '4,2', opacity: 0.6
+    });
+    // Arrow head
+    const ax = cx + r, ay = cy;
+    mkEl(svg, 'polygon', {
+        points: `${ax},${ay-4} ${ax+6},${ay} ${ax},${ay+4}`,
+        fill: color, opacity: 0.6
+    });
+    // "360°" label
+    const t = mkEl(svg, 'text', {
+        x: cx, y: cy - r - 6, 'font-size': 10, 'font-weight': 600,
+        fill: color, 'text-anchor': 'middle', opacity: 0.8
+    });
+    t.textContent = '360°';
+}
+
+function drawSwingArc(svg, cx, cy, r, color, o, v) {
+    // Draw a partial swing arc indicator
+    const arc = mkEl(svg, 'path', {
+        d: `M${cx-r*0.7},${cy-r*0.7}A${r},${r} 0 0,1 ${cx+r*0.7},${cy-r*0.7}`,
+        fill: 'none', stroke: color, 'stroke-width': 1.5, 'stroke-dasharray': '4,2', opacity: 0.6
+    });
+    // Double-headed arrow
+    const lx = cx-r*0.7, ly = cy-r*0.7;
+    const rx = cx+r*0.7, ry = cy-r*0.7;
+    mkEl(svg, 'polygon', {
+        points: `${lx+4},${ly-3} ${lx-2},${ly+2} ${lx+6},${ly+2}`,
+        fill: color, opacity: 0.6
+    });
+    mkEl(svg, 'polygon', {
+        points: `${rx-4},${ry-3} ${rx+2},${ry+2} ${rx-6},${ry+2}`,
+        fill: color, opacity: 0.6
+    });
+    const t = mkEl(svg, 'text', {
+        x: cx, y: cy - r - 6, 'font-size': 10, 'font-weight': 600,
+        fill: color, 'text-anchor': 'middle', opacity: 0.8
+    });
+    t.textContent = '摆动';
+}
+
+init();
 </script>
 </body>
 </html>
